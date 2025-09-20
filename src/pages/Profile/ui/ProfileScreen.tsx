@@ -5,6 +5,7 @@ import instance from '@/app/api/apiClient.tsx';
 import { useParams } from 'react-router';
 import { CreatePostModal } from '@/widgets/CreatePostModal/ui/CreatePostModal.tsx';
 import { PostsList } from '@/widgets/PostsList/ui/PostsList.tsx';
+import { FollowButton } from '@/features/followButton/ui/FollowButton.tsx';
 
 export const ProfileScreen = () => {
   const [showModal, setShowModal] = useState(false);
@@ -21,20 +22,6 @@ export const ProfileScreen = () => {
       setUser(data);
     }
   }, [params]);
-
-  const follow = async () => {
-    await instance.post('subscriptions/follow', {
-      followingId: user?.id,
-    });
-    await loadUsers();
-  };
-
-  const unfollow = async () => {
-    await instance.post('subscriptions/unfollow', {
-      followingId: user?.id,
-    });
-    await loadUsers();
-  };
 
   const getUsersPosts = useCallback(async () => {
     if (user.id) {
@@ -68,11 +55,7 @@ export const ProfileScreen = () => {
           <div className={'flex flex-1 flex-col gap-5 justify-end'}>
             {params.id ? (
               <>
-                {user?.isFollowed ? (
-                  <AppButton onClick={unfollow} title={'UnFollow'} />
-                ) : (
-                  <AppButton onClick={follow} title={'Follow'} />
-                )}
+                <FollowButton user={user} />
                 <AppButton onClick={() => {}} title={'Send message'} />
                 <AppButton onClick={() => setShowModal(true)} title={'See stores'} />
               </>
