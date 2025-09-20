@@ -1,6 +1,6 @@
-import { UsersListPage } from '@/pages/Users/ui/UsersListPage.tsx';
 import { useCallback, useEffect, useState } from 'react';
 import instance from '@/app/api/apiClient.tsx';
+import { PostsList } from '@/widgets/PostsList/ui/PostsList.tsx';
 
 export const FeedPage = () => {
   const [posts, setPosts] = useState([]);
@@ -14,5 +14,5 @@ export const FeedPage = () => {
     void getUsersPosts();
   }, [getUsersPosts]);
 
-  return <UsersListPage posts={posts} />;
+  return <PostsList posts={posts} />;
 };

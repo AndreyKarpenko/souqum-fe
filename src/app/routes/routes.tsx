@@ -10,24 +10,23 @@ import MessagesScreen from '@/pages/Messages/ui/MessagesScreen.tsx';
 import { DialogsLayout } from '@/app/layouts/DialogsLayout.tsx';
 import { AuthLayout } from '@/app/layouts/AuthLayout.tsx';
 
-import { useAuth } from '@/features/auth/model/useAuth.tsx';
 import { FollowersPage } from '@/pages/Followers/ui/FollowersPage.tsx';
 import { FollowingPage } from '@/pages/Following/ui/FollowingPage.tsx';
 import { FeedPage } from '@/pages/Feeds/ui/FeedsPage.tsx';
+import { useSelector } from 'react-redux';
+import { getUserSelector } from '@/entities/user/redux';
 
 const GuestRoute: FC<RouteProps> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const user = useSelector(getUserSelector);
 
-  if (loading) return <div>Загрузка...</div>;
   if (user) return <Navigate to="/profile" replace />;
 
   return children;
 };
 
 const ProtectedRoute: FC<RouteProps> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const user = useSelector(getUserSelector);
 
-  if (loading) return <div>Загрузка...</div>;
   if (!user) return <Navigate to="/" replace />;
 
   return children;

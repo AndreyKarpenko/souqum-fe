@@ -3,9 +3,8 @@ import { createPortal } from '@/shared/utils/createPortal.tsx';
 import { useCallback, useEffect, useState } from 'react';
 import instance from '@/app/api/apiClient.tsx';
 import { useParams } from 'react-router';
-import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
-import * as React from 'react';
-import { UsersListPage } from '@/pages/Users/ui/UsersListPage.tsx';
+import { CreatePostModal } from '@/widgets/CreatePostModal/ui/CreatePostModal.tsx';
+import { PostsList } from '@/widgets/PostsList/ui/PostsList.tsx';
 
 export const ProfileScreen = () => {
   const [showModal, setShowModal] = useState(false);
@@ -44,45 +43,23 @@ export const ProfileScreen = () => {
     }
   }, [user?.id]);
 
-  const [postContent, setPostContent] = useState('');
-
-  const addPost = async () => {
-    await instance.post('/posts', {
-      title: `${user.username} ${user.username} Post`,
-      content: postContent,
-    });
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPostContent(e.target.value);
+  const closeModalHandler = () => {
+    setShowModal(false);
   };
 
   useEffect(() => {
     (async () => {
       await loadUsers();
+    })();
+  }, [loadUsers]);
+
+  useEffect(() => {
+    (async () => {
       await getUsersPosts();
     })();
-  }, [getUsersPosts, loadUsers]);
+  }, [getUsersPosts]);
 
-  const seeStores = () =>
-    createPortal(
-      <div className={'absolute inset-0 flex items-center justify-center bg-[#00000090]'}>
-        <div
-          onClick={() => setShowModal(false)}
-          className={'h-[300px] w-[300px] grid gap-4 bg-red-200 overflow-scroll'}
-        >
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
-            <div
-              className={
-                'flex items-center justify-center h-[50px] w-[50px] bg-blue-200 border border-black'
-              }
-            >
-              {i}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+  const createPostModal = () => createPortal(<CreatePostModal onClose={closeModalHandler} />);
 
   return (
     <div className={'flex flex-1 gap-5'}>
@@ -99,7 +76,9 @@ export const ProfileScreen = () => {
                 <AppButton onClick={() => {}} title={'Send message'} />
                 <AppButton onClick={() => setShowModal(true)} title={'See stores'} />
               </>
-            ) : null}
+            ) : (
+              <AppButton onClick={() => setShowModal(true)} title={'Create New Post'} />
+            )}
           </div>
           <div className={'flex flex-1'} />
           <div className={'flex flex-1 flex-col justify-end'}>
@@ -113,17 +92,11 @@ export const ProfileScreen = () => {
           <div className={'flex flex-1 flex-col justify-end'} />
         </div>
         <div className={'flex flex-5 gap-5 bg-yellow-200'}></div>
-        {!params.id && (
-          <>
-            <AppInput onChange={handleChange} title={'Your post'} />
-            <AppButton onClick={addPost} title={'Add post'} />
-          </>
-        )}
 
-        <UsersListPage posts={posts} />
+        <PostsList posts={posts} />
       </div>
 
-      {showModal && seeStores()}
+      {showModal && createPostModal()}
     </div>
   );
 };

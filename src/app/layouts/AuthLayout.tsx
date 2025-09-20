@@ -1,7 +1,7 @@
-import { Link, Outlet, useNavigate } from 'react-router';
+import { Link, Outlet } from 'react-router';
 import Logo from '../../assets/logo.png';
 import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
-import { logout } from '@/features/auth/LogoutButton/api/logoutService.tsx';
+import { LogOutButton } from '@/features/auth/LogoutButton/ui/LogOutButton.tsx';
 
 const menuItems = [
   'Profile',
@@ -18,7 +18,6 @@ const menuItems = [
   'Settings',
 ];
 export const AuthLayout = () => {
-  const navigate = useNavigate();
   return (
     <div className="flex flex-col min-h-screen bg-gray-200">
       <header className={'flex px-5 gap-5 items-center bg-[#f0505f]'}>
@@ -43,10 +42,7 @@ export const AuthLayout = () => {
         </div>
         <div className={'flex flex-1 items-center justify-between'}>
           John Dou
-          <div
-            onClick={() => logout().then(() => navigate('/'))}
-            className={'h-[40px] w-[40px] rounded-full bg-white'}
-          />
+          <LogOutButton />
         </div>
       </header>
       <div className={'flex p-5 gap-5'}>

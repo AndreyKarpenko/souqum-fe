@@ -4,6 +4,8 @@ import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import { login } from '@/widgets/LoginForm/api/loginService.tsx';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { useCallback } from 'react';
+import { useAppDispatch } from '@/app/store/useAppDispatch.ts';
+import { setUser } from '@/entities/user/redux';
 
 type Inputs = {
   email: string;
@@ -13,20 +15,22 @@ type Inputs = {
 export const LoginForm = () => {
   const navigate = useNavigate();
   const { register, handleSubmit } = useForm<Inputs>();
+  const dispatch = useAppDispatch();
 
   const onSubmit: SubmitHandler<Inputs> = useCallback(
     async ({ email, password }) => {
       try {
-        await login({
+        const { data } = await login({
           email,
           password,
         });
+        dispatch(setUser(data.user));
         navigate('/profile');
       } catch {
         /* empty */
       }
     },
-    [navigate]
+    [dispatch, navigate]
   );
 
   return (
