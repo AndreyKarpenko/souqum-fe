@@ -5,7 +5,6 @@ import { removeUser } from '@/entities/user/redux';
 const instance = axios.create({
   baseURL: import.meta.env.VITE_HOST,
   timeout: 1000,
-  headers: { 'Content-Type': 'application/json' },
   withCredentials: true,
 });
 

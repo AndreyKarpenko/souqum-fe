@@ -11,15 +11,17 @@ export const DeletePostButton: FC<{ post: any }> = ({ post }) => {
   };
 
   return (
-    <>
+    <div className={'relative'}>
       {post.author.id === user?.id && (
         <div
           onClick={deletePost}
-          className={'cursor-pointer h-5 w-5 flex items-center justify-center rounded-full'}
+          className={
+            'absolute right-0 cursor-pointer h-5 w-5 flex items-center justify-center rounded-full'
+          }
         >
           X
         </div>
       )}
-    </>
+    </div>
   );
 };
