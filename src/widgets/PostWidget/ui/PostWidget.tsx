@@ -5,7 +5,9 @@ import { LikeButton } from '@/features/likeButton/ui/LikeButton.tsx';
 import { RepostButton } from '@/features/repostButton/ui/RepostButton.tsx';
 import { CommentCounter } from '@/features/commentCounter/ui/CommentCounter.tsx';
 import { CommentWidget } from '@/widgets/CommentWidget/ui/CommentWidget.tsx';
-import { DeletePostButton } from '@/features/deletePostButton/ui/DeletePostButton.tsx';
+import { DeleteButton } from '@/features/deletePostButton/ui/DeleteButton.tsx';
+import { LikeButtonType } from '@/features/likeButton/model/types.ts';
+import { DeleteButtonType } from '@/features/deletePostButton/model/types.ts';
 
 export const PostWidget: FC<{ post: any }> = ({ post }) => {
   return (
@@ -13,12 +15,12 @@ export const PostWidget: FC<{ post: any }> = ({ post }) => {
       <div className={'shadow-2xl p-5 rounded-2xl flex flex-col gap-5'}>
         <div className={'flex flex-1'}>
           <PostContent post={post} />
-          <DeletePostButton post={post} />
+          <DeleteButton type={DeleteButtonType.post} post={post} />
         </div>
         <div className={'flex gap-2 items-center'}>
           <CommentCounter post={post} />
           <RepostButton post={post} />
-          <LikeButton post={post} />
+          <LikeButton post={post} type={LikeButtonType.post} />
         </div>
       </div>
       <CommentWidget post={post} />

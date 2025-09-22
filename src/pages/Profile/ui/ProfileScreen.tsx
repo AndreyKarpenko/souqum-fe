@@ -49,10 +49,10 @@ export const ProfileScreen = () => {
   const createPostModal = () => createPortal(<CreatePostModal onClose={closeModalHandler} />);
 
   return (
-    <div className={'flex flex-1 gap-5'}>
-      <div className={'flex flex-5 flex-col gap-5'}>
-        <div className={'flex flex-2 bg-blue-300 rounded-2xl'}>
-          <div className={'flex flex-1 flex-col gap-5 justify-end'}>
+    <div className={'flex flex-col gap-5'}>
+      <div className={'h-[60vh] flex flex-col gap-5'}>
+        <div className={'flex bg-blue-300 rounded-2xl'}>
+          <div className={'flex flex-1 flex-col justify-between'}>
             {params.id ? (
               <>
                 <FollowButton user={user} />
@@ -67,18 +67,16 @@ export const ProfileScreen = () => {
           <div className={'flex flex-1 flex-col justify-end'}>
             <img
               alt={'user_avatar'}
-              className={'w-full aspect-square rounded-full bg-white'}
+              className={'h-full aspect-square rounded-full bg-white'}
               src={user?.avatar}
             />
           </div>
           <div className={'flex flex-1'} />
           <div className={'flex flex-1 flex-col justify-end'} />
         </div>
-        <div className={'flex flex-5 gap-5 bg-yellow-200'}></div>
-
-        <PostsList posts={posts} />
+        <div className={'flex flex-1 gap-5 bg-yellow-200'}></div>
       </div>
-
+      <PostsList posts={posts} />
       {showModal && createPostModal()}
     </div>
   );

@@ -1,8 +1,8 @@
 import { type FC } from 'react';
 import { UserAvatar } from '@/features/userAvatar/ui/UserAvatar.tsx';
 import { UserAvatarType } from '@/features/userAvatar/model/types.ts';
-import Masonry from '@mui/lab/Masonry';
-import { AttachedImage } from '@/features/attachedImage/ui/AttachedImage.tsx';
+
+import { AttachmentWidget } from '@/widgets/AttachmentWidget/ui/AttachmentWidget.tsx';
 
 export const PostContent: FC<{ post: any; isRepost?: boolean }> = ({ post, isRepost }) => {
   return (
@@ -26,13 +26,7 @@ export const PostContent: FC<{ post: any; isRepost?: boolean }> = ({ post, isRep
         </div>
       )}
 
-      {!!post.attachment.length && (
-        <Masonry columns={Math.min(post.attachment.length, 3)} spacing={2}>
-          {post.attachment.map((attachment: any) => (
-            <AttachedImage url={attachment.media.url} />
-          ))}
-        </Masonry>
-      )}
+      <AttachmentWidget attachment={post.attachment} />
 
       <div className={'flex flex-1 items-center'}>{post.content}</div>
     </div>

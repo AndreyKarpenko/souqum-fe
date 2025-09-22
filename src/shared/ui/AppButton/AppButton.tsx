@@ -8,7 +8,7 @@ type AppButtonProps = {
 
 export const AppButton: FC<AppButtonProps> = ({ title, bgColor = '#f0505f', onClick }) => {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-col">
       <button
         onClick={onClick}
         style={{ backgroundColor: bgColor }}

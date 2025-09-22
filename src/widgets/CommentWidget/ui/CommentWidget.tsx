@@ -1,14 +1,18 @@
-import { type FC, useCallback, useState } from 'react';
+import { type FC, useCallback, useRef, useState } from 'react';
 import { CommentContent } from '@/widgets/CommentContent/ui/CommentContent.tsx';
 import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import instance from '@/app/api/apiClient.tsx';
 import * as React from 'react';
+import { UploadImage, type UploadImageRef } from '@/widgets/UploadImage/ui/UploadImage.tsx';
 
 export const CommentWidget: FC<{ post: any }> = ({ post }) => {
   const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [commentContent, setCommentContent] = useState('');
+  const [attachments, setAttachments] = useState<any[]>([]);
+
+  const uploadImageRef = useRef<UploadImageRef>(null);
 
   const getAllComments = useCallback(async () => {
     if (!showComments) {
@@ -23,7 +27,13 @@ export const CommentWidget: FC<{ post: any }> = ({ post }) => {
   };
 
   const addComment = async (id: string) => {
-    await instance.post('/comments', { content: commentContent, postId: id });
+    const formData = new FormData();
+
+    attachments.forEach((file) => formData.append('files', file)); // ключ 'files' одинаковый для всех
+    formData.append('postId', id);
+    formData.append('content', commentContent);
+
+    await instance.post('/comments', formData);
   };
 
   return (
@@ -49,9 +59,13 @@ export const CommentWidget: FC<{ post: any }> = ({ post }) => {
       )}
       <div className={'gap-5 mx-5 flex flex-row'}>
         <AppInput onChange={handleChange} title={''} />
-        <div>
+        <div className={'flex gap-5'}>
+          <AppButton onClick={uploadImageRef.current?.handleClick} title={'Upload image'} />
           <AppButton onClick={() => addComment(post.id)} title={'Add comment'} />
         </div>
+      </div>
+      <div className={'mx-5'}>
+        <UploadImage ref={uploadImageRef} onChange={setAttachments} />
       </div>
     </>
   );
