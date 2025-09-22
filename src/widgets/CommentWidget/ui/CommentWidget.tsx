@@ -10,7 +10,7 @@ export const CommentWidget: FC<{ post: any }> = ({ post }) => {
   const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [commentContent, setCommentContent] = useState('');
-  const [attachments, setAttachments] = useState<any[]>([]);
+  const [media, setMedia] = useState<any[]>([]);
 
   const uploadImageRef = useRef<UploadImageRef>(null);
 
@@ -29,7 +29,7 @@ export const CommentWidget: FC<{ post: any }> = ({ post }) => {
   const addComment = async (id: string) => {
     const formData = new FormData();
 
-    attachments.forEach((file) => formData.append('files', file)); // ключ 'files' одинаковый для всех
+    media.forEach((file) => formData.append('files', file)); // ключ 'files' одинаковый для всех
     formData.append('postId', id);
     formData.append('content', commentContent);
 
@@ -65,7 +65,7 @@ export const CommentWidget: FC<{ post: any }> = ({ post }) => {
         </div>
       </div>
       <div className={'mx-5'}>
-        <UploadImage ref={uploadImageRef} onChange={setAttachments} />
+        <UploadImage ref={uploadImageRef} onChange={setMedia} />
       </div>
     </>
   );

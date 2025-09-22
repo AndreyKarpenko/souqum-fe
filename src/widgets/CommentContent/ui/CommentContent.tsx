@@ -15,7 +15,7 @@ export const CommentContent: FC<{ comment: any }> = ({ comment }) => {
         <UserAvatar profile={comment.author} type={UserAvatarType.comment} />
         <div className={'flex flex-1 flex-col'}>
           <div className={'text-lg'}> {comment.author.username}</div>
-          <AttachmentWidget attachment={comment.attachment} />
+          <AttachmentWidget media={comment.media} />
           <div className={'text-md '}>{comment.content}</div>
           <div className={'text-xs text-gray-400'}>
             {new Date(comment.createdAt).toDateString()}

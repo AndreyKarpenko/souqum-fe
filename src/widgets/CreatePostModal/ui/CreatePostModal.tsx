@@ -7,7 +7,7 @@ import { UploadImage, type UploadImageRef } from '@/widgets/UploadImage/ui/Uploa
 
 export const CreatePostModal: FC<{ onClose: () => void; post?: any }> = ({ onClose, post }) => {
   const [postContent, setPostContent] = useState('');
-  const [attachments, setAttachments] = useState<File[]>([]);
+  const [media, setMedia] = useState<File[]>([]);
 
   const uploadImageRef = useRef<UploadImageRef>(null);
 
@@ -22,7 +22,7 @@ export const CreatePostModal: FC<{ onClose: () => void; post?: any }> = ({ onClo
   const addPost = async () => {
     const formData = new FormData();
 
-    attachments.forEach((file) => formData.append('files', file)); // ключ 'files' одинаковый для всех
+    media.forEach((file) => formData.append('files', file)); // ключ 'files' одинаковый для всех
     formData.append('title', 'Some Title');
     formData.append('content', postContent);
     await instance.post('/posts', formData);
@@ -49,7 +49,7 @@ export const CreatePostModal: FC<{ onClose: () => void; post?: any }> = ({ onClo
         <textarea onChange={handleTextChange} className={'bg-white p-3 min-h-50 resize-none'} />
         <AppButton onClick={post ? repost : addPost} title={post ? 'Repost' : 'Add post'} />
         <AppButton onClick={uploadImageRef.current?.handleClick} title={'Upload image'} />
-        <UploadImage ref={uploadImageRef} onChange={setAttachments} />
+        <UploadImage ref={uploadImageRef} onChange={setMedia} />
       </div>
     </div>
   );

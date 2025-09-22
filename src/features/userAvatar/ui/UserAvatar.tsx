@@ -80,11 +80,15 @@ export const UserAvatar: FC<{ profile: any; type: UserAvatarType }> = ({ type, p
             onClick={openProfileHandler}
             src={profile.avatar}
             alt="user_avatar"
-            className={'h-10 w-10 rounded-full bg-blue-600'}
+            className={'h-10 w-10'}
           />
         );
     }
   }, [openProfileHandler, profile.avatar, type]);
 
-  return <div className={'cursor-pointer h-fit w-fit rounded-full bg-blue-600'}>{userAvatar}</div>;
+  return (
+    <div className={'cursor-pointer h-fit w-fit rounded-full bg-white border-2 border-black'}>
+      {userAvatar}
+    </div>
+  );
 };

@@ -1,6 +1,10 @@
 import { Link, Outlet } from 'react-router';
-import Logo from '../../assets/logo.png';
+import Logo from '@/assets/logo.png';
 import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
+import { useSelector } from 'react-redux';
+import { getUserSelector } from '@/entities/user/redux';
+import { UserAvatar } from '@/features/userAvatar/ui/UserAvatar.tsx';
+import { UserAvatarType } from '@/features/userAvatar/model/types.ts';
 import { LogOutButton } from '@/features/auth/LogoutButton/ui/LogOutButton.tsx';
 
 const menuItems = [
@@ -18,6 +22,8 @@ const menuItems = [
   'Settings',
 ];
 export const AuthLayout = () => {
+  const user = useSelector(getUserSelector);
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-200">
       <header className={'flex px-5 gap-5 items-center bg-[#f0505f]'}>
@@ -26,7 +32,8 @@ export const AuthLayout = () => {
             <img className={'h-[80px]'} src={Logo} alt={'logo'} />
           </div>
         </div>
-        <div className={'flex flex-5 gap-5'}>
+        <div className={'flex flex-5 gap-5 items-center'}>
+          <LogOutButton />
           <div className={'flex flex-2 items-center justify-center gap-3'}>
             My stores
             <div className={'flex'}>
@@ -40,9 +47,10 @@ export const AuthLayout = () => {
             <AppInput title={''} />
           </div>
         </div>
-        <div className={'flex flex-1 items-center justify-between'}>
-          John Dou
-          <LogOutButton />
+        <div className={'flex flex-1 items-center justify-end gap-5'}>
+          <UserAvatar profile={user} type={UserAvatarType.header} />
+          {user?.username}
+          {/*<LogOutButton />*/}
         </div>
       </header>
       <div className={'flex p-5 gap-5'}>
