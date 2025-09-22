@@ -49,7 +49,7 @@ export const ProfileScreen = () => {
   const createPostModal = () => createPortal(<CreatePostModal onClose={closeModalHandler} />);
 
   return (
-    <div className={'flex flex-col gap-5'}>
+    <div className={'flex flex-1 flex-col gap-5'}>
       <div className={'h-[60vh] flex flex-col gap-5'}>
         <div className={'flex bg-blue-300 rounded-2xl'}>
           <div className={'flex flex-1 flex-col justify-between'}>
