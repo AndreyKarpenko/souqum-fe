@@ -13,6 +13,7 @@ const menuItems = [
   'Messages',
   'Wallet',
   'Purchase',
+  'Users',
   'Followers',
   'Following',
   'Communities',

@@ -2,7 +2,7 @@ import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import { createPortal } from '@/shared/utils/createPortal.tsx';
 import { useCallback, useEffect, useState } from 'react';
 import instance from '@/app/api/apiClient.tsx';
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { CreatePostModal } from '@/widgets/CreatePostModal/ui/CreatePostModal.tsx';
 import { PostsList } from '@/widgets/PostsList/ui/PostsList.tsx';
 import { FollowButton } from '@/features/followButton/ui/FollowButton.tsx';
@@ -12,6 +12,7 @@ export const ProfileScreen = () => {
   const params = useParams();
   const [user, setUser] = useState<any>(null);
   const [posts, setPosts] = useState([]);
+  const navigate = useNavigate();
 
   const loadUsers = useCallback(async () => {
     if (params.id) {
@@ -32,6 +33,11 @@ export const ProfileScreen = () => {
 
   const closeModalHandler = () => {
     setShowModal(false);
+  };
+
+  const createDialog = async () => {
+    const { data } = await instance.post(`/dialogs`, { participantIds: [user.id] });
+    navigate(`/messages/${data?.id}`);
   };
 
   useEffect(() => {
@@ -56,8 +62,8 @@ export const ProfileScreen = () => {
             {params.id ? (
               <>
                 <FollowButton user={user} />
-                <AppButton onClick={() => {}} title={'Send message'} />
-                <AppButton onClick={() => setShowModal(true)} title={'See stores'} />
+                <AppButton onClick={createDialog} title={'Send message'} />
+                <AppButton onClick={() => {}} title={'See stores'} />
               </>
             ) : (
               <AppButton onClick={() => setShowModal(true)} title={'Create New Post'} />

@@ -1,5 +1,5 @@
 import { BrowserRouter, Navigate, Route, type RouteProps, Routes } from 'react-router';
-import type { FC } from 'react';
+import { type FC } from 'react';
 import { MainLayout } from '@/app/layouts/MainLayout.tsx';
 import SignInPage from '@/pages/SignIn/ui/SignInPage.tsx';
 import SignUpPage from '@/pages/SignUp/ui/SignUpPage.tsx';
@@ -15,6 +15,7 @@ import { FollowingPage } from '@/pages/Following/ui/FollowingPage.tsx';
 import { FeedPage } from '@/pages/Feeds/ui/FeedsPage.tsx';
 import { useSelector } from 'react-redux';
 import { getUserSelector } from '@/entities/user/redux';
+import { UsersPage } from '@/pages/Users/ui/UsersPage.tsx';
 
 const GuestRoute: FC<RouteProps> = ({ children }) => {
   const user = useSelector(getUserSelector);
@@ -85,6 +86,14 @@ export const Router: FC = () => {
             element={
               <ProtectedRoute>
                 <FeedPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              <ProtectedRoute>
+                <UsersPage />
               </ProtectedRoute>
             }
           />
