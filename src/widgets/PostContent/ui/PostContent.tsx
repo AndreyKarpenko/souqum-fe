@@ -26,7 +26,7 @@ export const PostContent: FC<{ post: any; isRepost?: boolean }> = ({ post, isRep
         </div>
       )}
 
-      <AttachmentWidget media={post.media} />
+      <AttachmentWidget media={post?.media} />
 
       <div className={'flex flex-1 items-center'}>{post.content}</div>
     </div>

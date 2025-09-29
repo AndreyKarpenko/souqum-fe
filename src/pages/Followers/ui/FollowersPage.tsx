@@ -1,5 +1,5 @@
 import { type FC, useEffect, useState } from 'react';
-import instance from '@/app/api/apiClient.tsx';
+import apiClient from '@/app/api/apiClient.tsx';
 import { useNavigate } from 'react-router';
 
 export const FollowersPage: FC = () => {
@@ -7,7 +7,7 @@ export const FollowersPage: FC = () => {
   const navigate = useNavigate();
 
   const getAllUsers = async () => {
-    const { data } = await instance.get('/subscriptions/followers');
+    const { data } = await apiClient.get('/subscriptions/followers');
     setUser(data);
   };
 

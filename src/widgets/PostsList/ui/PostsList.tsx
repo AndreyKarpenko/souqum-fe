@@ -5,7 +5,7 @@ export const PostsList: FC<{ posts: any[] }> = ({ posts = [] }) => {
   return (
     <div className={'flex flex-1 flex-col gap-5'}>
       {posts.map((post) => (
-        <PostWidget post={post} />
+        <PostWidget key={post.id} post={post} />
       ))}
     </div>
   );

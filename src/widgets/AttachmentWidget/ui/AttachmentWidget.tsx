@@ -8,7 +8,7 @@ export const AttachmentWidget: FC<{ media: any[] }> = ({ media }) => {
       {!!media.length && (
         <Masonry columns={3} spacing={2}>
           {media.map((media: any) => (
-            <AttachedImage url={media.url} />
+            <AttachedImage key={media.id} url={media.url} />
           ))}
         </Masonry>
       )}

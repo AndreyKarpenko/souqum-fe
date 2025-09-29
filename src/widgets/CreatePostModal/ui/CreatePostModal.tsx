@@ -1,7 +1,7 @@
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import * as React from 'react';
 import { type FC, useRef, useState } from 'react';
-import instance from '@/app/api/apiClient.tsx';
+import apiClient from '@/app/api/apiClient.tsx';
 import { PostContent } from '@/widgets/PostContent/ui/PostContent.tsx';
 import { UploadImage, type UploadImageRef } from '@/widgets/UploadImage/ui/UploadImage.tsx';
 
@@ -12,7 +12,7 @@ export const CreatePostModal: FC<{ onClose: () => void; post?: any }> = ({ onClo
   const uploadImageRef = useRef<UploadImageRef>(null);
 
   const repost = async () => {
-    await instance.post(`/posts/repost/${post?.originalPost?.id ?? post.id}`, {
+    await apiClient.post(`/posts/repost/${post?.originalPost?.id ?? post.id}`, {
       content: postContent,
       title: 'Some Title',
     });
@@ -25,7 +25,7 @@ export const CreatePostModal: FC<{ onClose: () => void; post?: any }> = ({ onClo
     media.forEach((file) => formData.append('files', file)); // ключ 'files' одинаковый для всех
     formData.append('title', 'Some Title');
     formData.append('content', postContent);
-    await instance.post('/posts', formData);
+    await apiClient.post('/posts', formData);
     onClose();
   };
 

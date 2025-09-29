@@ -14,21 +14,31 @@ import { FollowersPage } from '@/pages/Followers/ui/FollowersPage.tsx';
 import { FollowingPage } from '@/pages/Following/ui/FollowingPage.tsx';
 import { FeedPage } from '@/pages/Feeds/ui/FeedsPage.tsx';
 import { useSelector } from 'react-redux';
-import { getUserSelector } from '@/entities/user/redux';
+import {
+  userIsLoggedInSelector,
+  userTokenIsLoadingSelector,
+  userTokenSelector,
+} from '@/entities/auth/redux';
 import { UsersPage } from '@/pages/Users/ui/UsersPage.tsx';
 
 const GuestRoute: FC<RouteProps> = ({ children }) => {
-  const user = useSelector(getUserSelector);
+  const isAuth = useSelector(userTokenSelector);
+  const isLoading = useSelector(userTokenIsLoadingSelector);
+  const isLoggedIn = useSelector(userIsLoggedInSelector);
 
-  if (user) return <Navigate to="/profile" replace />;
+  if (isLoading && isLoggedIn) return null;
+  if (isAuth) return <Navigate to="/profile" replace />;
 
   return children;
 };
 
 const ProtectedRoute: FC<RouteProps> = ({ children }) => {
-  const user = useSelector(getUserSelector);
+  const isAuth = useSelector(userTokenSelector);
+  const isLoading = useSelector(userTokenIsLoadingSelector);
+  const isLoggedIn = useSelector(userIsLoggedInSelector);
 
-  if (!user) return <Navigate to="/" replace />;
+  if (isLoading && isLoggedIn) return null;
+  if (!isAuth) return <Navigate to="/" replace />;
 
   return children;
 };

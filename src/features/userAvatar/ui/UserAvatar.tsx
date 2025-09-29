@@ -1,11 +1,11 @@
 import { type FC, useCallback, useMemo, type MouseEvent } from 'react';
 import { useSelector } from 'react-redux';
-import { getUserSelector } from '@/entities/user/redux';
+import { userInfoSelector } from '@/entities/user/redux';
 import { useNavigate } from 'react-router';
 import { UserAvatarType } from '@/features/userAvatar/model/types.ts';
 
 export const UserAvatar: FC<{ profile: any; type: UserAvatarType }> = ({ type, profile }) => {
-  const user = useSelector(getUserSelector);
+  const user = useSelector(userInfoSelector);
   const navigate = useNavigate();
 
   const openProfileHandler = useCallback(

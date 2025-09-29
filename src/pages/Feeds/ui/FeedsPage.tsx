@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import instance from '@/app/api/apiClient.tsx';
+import apiClient from '@/app/api/apiClient.tsx';
 import { PostsList } from '@/widgets/PostsList/ui/PostsList.tsx';
 
 export const FeedPage = () => {
   const [posts, setPosts] = useState([]);
 
   const getUsersPosts = useCallback(async () => {
-    const { data: posts } = await instance.get(`/posts`);
+    const { data: posts } = await apiClient.get(`/posts`);
     setPosts(posts);
   }, []);
 

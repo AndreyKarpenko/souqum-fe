@@ -1,22 +1,24 @@
-import { type FC, useCallback, useRef, useState } from 'react';
+import { type FC, useCallback, useEffect, useRef, useState } from 'react';
 import { CommentContent } from '@/widgets/CommentContent/ui/CommentContent.tsx';
 import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
-import instance from '@/app/api/apiClient.tsx';
+import apiClient from '@/app/api/apiClient.tsx';
 import * as React from 'react';
 import { UploadImage, type UploadImageRef } from '@/widgets/UploadImage/ui/UploadImage.tsx';
+import { SocketApi } from '@/app/configs/socket/socket.ts';
 
 export const CommentWidget: FC<{ post: any }> = ({ post }) => {
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState<any[]>([]);
   const [showComments, setShowComments] = useState(false);
   const [commentContent, setCommentContent] = useState('');
   const [media, setMedia] = useState<any[]>([]);
+  const socket = SocketApi.socket;
 
   const uploadImageRef = useRef<UploadImageRef>(null);
 
   const getAllComments = useCallback(async () => {
     if (!showComments) {
-      const { data: comments } = await instance.get(`/comments/${post.id}`);
+      const { data: comments } = await apiClient.get(`/comments/${post.id}`);
       setComments(comments);
     }
     setShowComments((prevState) => !prevState);
@@ -27,14 +29,34 @@ export const CommentWidget: FC<{ post: any }> = ({ post }) => {
   };
 
   const addComment = async (id: string) => {
+    setShowComments(true);
     const formData = new FormData();
 
     media.forEach((file) => formData.append('files', file)); // ключ 'files' одинаковый для всех
     formData.append('postId', id);
     formData.append('content', commentContent);
 
-    await instance.post('/comments', formData);
+    await apiClient.post('/comments', formData);
   };
+
+  const handleReceive = (data: any) => {
+    setComments((prev) => [...prev, data]);
+  };
+
+  const handleRemove = (data: any) => {
+    setComments((prev) => prev.filter((item) => item.id !== data));
+  };
+
+  useEffect(() => {
+    socket?.emit('subscribePostComment', { postId: post.id });
+    socket?.on('receiveComment', handleReceive);
+    socket?.on('deleteComment', handleRemove);
+    return () => {
+      socket?.emit('unsubscribePostComment', { postId: post.id });
+      socket?.off('receiveComment', handleReceive);
+      socket?.off('deleteComment', handleRemove);
+    };
+  }, [post.id, socket]);
 
   return (
     <>

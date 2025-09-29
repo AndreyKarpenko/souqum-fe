@@ -1,16 +1,16 @@
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
-import instance from '@/app/api/apiClient.tsx';
+import apiClient from '@/app/api/apiClient.tsx';
 import type { FC } from 'react';
 
 export const FollowButton: FC<{ user: any }> = ({ user }) => {
   const follow = async () => {
-    await instance.post('subscriptions/follow', {
+    await apiClient.post('subscriptions/follow', {
       followingId: user?.id,
     });
   };
 
   const unfollow = async () => {
-    await instance.post('subscriptions/unfollow', {
+    await apiClient.post('subscriptions/unfollow', {
       followingId: user?.id,
     });
   };

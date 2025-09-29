@@ -1,8 +1,8 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import { env } from '@/features/envPicker/redux';
 import { user } from '@/entities/user/redux';
+import { auth } from '@/entities/auth/redux';
 
 export const reducers = combineReducers({
-  env,
   user,
+  auth,
 });

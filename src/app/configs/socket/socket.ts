@@ -1,3 +1,12 @@
-import io from 'socket.io-client';
+import io, { type SocketOptions, Socket } from 'socket.io-client';
 
-export const socket = io(import.meta.env.VITE_HOST);
+export class SocketApi {
+  static socket: Socket | null = null;
+
+  static createConnection(options?: SocketOptions) {
+    if (!this.socket) {
+      this.socket = io(import.meta.env.VITE_HOST, options);
+    }
+    return this.socket;
+  }
+}

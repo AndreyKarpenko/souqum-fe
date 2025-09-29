@@ -2,7 +2,7 @@ import { Link, Outlet } from 'react-router';
 import Logo from '@/assets/logo.png';
 import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
 import { useSelector } from 'react-redux';
-import { getUserSelector } from '@/entities/user/redux';
+import { userInfoSelector } from '@/entities/user/redux';
 import { UserAvatar } from '@/features/userAvatar/ui/UserAvatar.tsx';
 import { UserAvatarType } from '@/features/userAvatar/model/types.ts';
 import { LogOutButton } from '@/features/auth/LogoutButton/ui/LogOutButton.tsx';
@@ -23,7 +23,7 @@ const menuItems = [
   'Settings',
 ];
 export const AuthLayout = () => {
-  const user = useSelector(getUserSelector);
+  const user = useSelector(userInfoSelector);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-200">
@@ -57,7 +57,7 @@ export const AuthLayout = () => {
       <div className={'flex p-5 gap-5'}>
         <div className={'flex flex-1 gap-5 h-fit flex-col'}>
           {menuItems.map((menuItem) => (
-            <Link to={`/${menuItem.toLowerCase()}`}>
+            <Link key={menuItem} to={`/${menuItem.toLowerCase()}`}>
               <div className={'text-2xl cursor-pointer'}>{menuItem}</div>
             </Link>
           ))}

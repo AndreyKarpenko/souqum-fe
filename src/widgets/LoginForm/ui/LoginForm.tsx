@@ -1,11 +1,10 @@
 import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
-import { Link, useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
-import { login } from '@/widgets/LoginForm/api/loginService.tsx';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { useCallback } from 'react';
 import { useAppDispatch } from '@/app/store/useAppDispatch.ts';
-import { setUser } from '@/entities/user/redux';
+import { signInThunk } from '@/entities/auth/redux';
 
 type Inputs = {
   email: string;
@@ -13,24 +12,18 @@ type Inputs = {
 };
 
 export const LoginForm = () => {
-  const navigate = useNavigate();
   const { register, handleSubmit } = useForm<Inputs>();
   const dispatch = useAppDispatch();
 
   const onSubmit: SubmitHandler<Inputs> = useCallback(
     async ({ email, password }) => {
       try {
-        const { data } = await login({
-          email,
-          password,
-        });
-        dispatch(setUser(data.user));
-        navigate('/profile');
+        await dispatch(signInThunk({ email, password }));
       } catch {
         /* empty */
       }
     },
-    [dispatch, navigate]
+    [dispatch]
   );
 
   return (

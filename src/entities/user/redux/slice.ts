@@ -1,6 +1,7 @@
-import { type PayloadAction, createSlice } from '@reduxjs/toolkit';
-
-import type { User, UserState } from '@/entities/user/model/types.ts';
+import { createSlice } from '@reduxjs/toolkit';
+import type { UserState } from '@/entities/user/model/types.ts';
+import { getMyProfileThunk } from '@/entities/user/redux/thunk.ts';
+import { signOutThunk } from '@/entities/auth/redux';
 
 const initialState: UserState = {
   user: null,
@@ -9,17 +10,15 @@ const initialState: UserState = {
 const slice = createSlice({
   name: 'user',
   initialState: initialState,
-  reducers: {
-    setUser: (state: UserState, { payload }: PayloadAction<User>) => {
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(getMyProfileThunk.fulfilled, (state, { payload }) => {
       state.user = payload;
-    },
-    removeUser: (state: UserState) => {
+    });
+    builder.addCase(signOutThunk.fulfilled, (state) => {
       state.user = null;
-    },
+    });
   },
 });
 
-export const {
-  actions: { setUser, removeUser },
-  reducer: user,
-} = slice;
+export const { reducer: user } = slice;

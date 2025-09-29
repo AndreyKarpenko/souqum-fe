@@ -1,5 +1,5 @@
 import { type FC, useMemo } from 'react';
-import instance from '@/app/api/apiClient.tsx';
+import apiClient from '@/app/api/apiClient.tsx';
 import { LikeButtonType } from '@/features/likeButton/model/types.ts';
 
 export const LikeButton: FC<{ post?: any; comment?: any; message?: any; type: LikeButtonType }> = ({
@@ -10,17 +10,17 @@ export const LikeButton: FC<{ post?: any; comment?: any; message?: any; type: Li
 }) => {
   const likeUnlikePost = async () => {
     if (post.isLiked) {
-      await instance.delete(`/likes/post/${post.id}`);
+      await apiClient.delete(`/likes/post/${post.id}`);
     } else {
-      await instance.post(`/likes/post/${post.id}`);
+      await apiClient.post(`/likes/post/${post.id}`);
     }
   };
 
   const likeUnlikeComment = async () => {
     if (comment.isLiked) {
-      await instance.delete(`/likes/comment/${comment.id}`);
+      await apiClient.delete(`/likes/comment/${comment.id}`);
     } else {
-      await instance.post(`/likes/comment/${comment.id}`);
+      await apiClient.post(`/likes/comment/${comment.id}`);
     }
   };
 

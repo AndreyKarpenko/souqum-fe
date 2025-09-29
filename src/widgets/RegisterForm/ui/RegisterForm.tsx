@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { useCallback } from 'react';
-import { signUp } from '@/widgets/LoginForm/api/loginService.tsx';
+import { signUpApi } from '@/widgets/LoginForm/api/loginService.tsx';
 
 type Inputs = {
   email: string;
@@ -17,7 +17,7 @@ export const RegisterForm = () => {
   const onSubmit: SubmitHandler<Inputs> = useCallback(
     async ({ email, password, lastName, firstName }) => {
       try {
-        await signUp({
+        await signUpApi({
           email,
           password,
           firstName,

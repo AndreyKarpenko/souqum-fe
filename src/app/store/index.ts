@@ -6,7 +6,7 @@ import { reducers } from './reducers';
 
 type CoreReduxState = ReturnType<typeof reducers>;
 
-const whitelist: Extract<keyof CoreReduxState, string>[] = ['env', 'user'];
+const whitelist: Extract<keyof CoreReduxState, string>[] = ['user'];
 
 const persistConfig = {
   key: 'root',

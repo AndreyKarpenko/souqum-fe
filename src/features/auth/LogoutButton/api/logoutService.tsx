@@ -1,8 +1,8 @@
-import instance from '@/app/api/apiClient.tsx';
+import apiClient from '@/app/api/apiClient.tsx';
 
-export const logout = async () => {
+export const signOutApi = async () => {
   try {
-    await instance.post('/auth/logout');
+    await apiClient.post('/auth/signout');
   } catch {
     /* empty */
   }
