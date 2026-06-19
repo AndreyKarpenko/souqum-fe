@@ -1,13 +1,13 @@
 import { type FC, useEffect, useState } from 'react';
 import apiClient from '@/app/api/apiClient.tsx';
-import { useNavigate } from 'react-router';
+import { UserAvatar } from '@/features/userAvatar/ui/UserAvatar.tsx';
+import { UserAvatarType } from '@/features/userAvatar/model/types.ts';
 
 export const FollowersPage: FC = () => {
   const [users, setUser] = useState<any[]>([]);
-  const navigate = useNavigate();
 
   const getAllUsers = async () => {
-    const { data } = await apiClient.get('/subscriptions/followers');
+    const { data } = await apiClient.get('/user/subscribers');
     setUser(data);
   };
 
@@ -17,18 +17,10 @@ export const FollowersPage: FC = () => {
 
   return (
     <div className={'flex flex-1 flex-col gap-5'}>
-      {users.map((user) => (
+      {users?.map((user) => (
         <>
-          <div
-            onClick={() => navigate(`/profile/${user.id}`)}
-            className={'p-5 gap-5 flex h-30 flex-row items-center bg-amber-400 '}
-          >
-            <img
-              onClick={() => navigate(`/profile/${user.id}`)}
-              src={user.avatar}
-              alt="user_avatar"
-              className={'h-10 w-10 rounded-full bg-blue-600'}
-            />
+          <div className={'p-5 gap-5 flex h-30 flex-row items-center bg-amber-400 '}>
+            <UserAvatar profile={user} type={UserAvatarType.comment} />
             {user.displayName}
           </div>
         </>

@@ -1,51 +1,51 @@
 import { AxiosError } from 'axios';
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import {
-  abortAllRequests,
-  applyAuthInterceptor,
-  ejectAuthInterceptor,
-} from '@/app/api/apiClient.tsx';
-import { refreshTokenApi, signInApi } from '@/entities/auth/api/authService.tsx';
+import { abortAllRequests, ejectAuthInterceptor } from '@/app/api/apiClient.tsx';
+import { getMeApi, signInApi, verifyOtpApi } from '@/entities/auth/api/authService.tsx';
 import { signOutApi } from '@/features/auth/LogoutButton/api/logoutService.tsx';
 
-export const signInThunk = createAsyncThunk<string, any>(
-  'auth/signInThunk',
-  async (params, { rejectWithValue, dispatch }) => {
+export const signInThunk = createAsyncThunk<
+  { is2FAEnabled: boolean; sid?: string },
+  { email: string; password: string }
+>('auth/signInThunk', async (params, { rejectWithValue }) => {
+  try {
+    return await signInApi(params);
+  } catch (e) {
+    const error = e as AxiosError<{
+      statusCode: number;
+      message: string;
+      timestamp: string;
+      path: string;
+    }>;
+    return rejectWithValue(error.response?.data.message ?? 'Something went wrong');
+  }
+});
+
+export const verifyOtpThunk = createAsyncThunk<void, { sid: string; otp: string }>(
+  'auth/verifyOtpThunk',
+  async (params, { rejectWithValue }) => {
     try {
-      const dispatchLogoutThunk = () => {
-        void dispatch(signOutThunk());
-      };
-      const dispatchRefreshTokenThunk = () => {
-        void dispatch(refreshTokenThunk());
-      };
-      const { accessToken } = await signInApi(params);
-      applyAuthInterceptor(accessToken, dispatchLogoutThunk, dispatchRefreshTokenThunk);
-      return accessToken;
+      await verifyOtpApi(params);
     } catch (e) {
-      const error = e as AxiosError<any>;
-      return rejectWithValue(error.response?.data.detail ?? 'Something went wrong');
+      const error = e as AxiosError<{
+        statusCode: number;
+        message: string;
+        timestamp: string;
+        path: string;
+      }>;
+      return rejectWithValue(error.response?.data.message ?? 'Something went wrong');
     }
   }
 );
 
-export const refreshTokenThunk = createAsyncThunk<string, void>(
-  'auth/refreshTokenThunk',
-  async (_, { rejectWithValue, dispatch }) => {
+export const checkSessionThunk = createAsyncThunk(
+  'auth/checkSession',
+  async (_, { rejectWithValue }) => {
     try {
-      const dispatchLogoutThunk = () => {
-        void dispatch(signOutThunk());
-      };
-      const dispatchRefreshTokenThunk = () => {
-        void dispatch(refreshTokenThunk());
-      };
-      const { accessToken } = await refreshTokenApi();
-      ejectAuthInterceptor();
-      applyAuthInterceptor(accessToken, dispatchLogoutThunk, dispatchRefreshTokenThunk);
-      return accessToken;
-    } catch (e) {
-      const error = e as AxiosError<any>;
-      return rejectWithValue(error.response?.data.detail ?? 'Something went wrong');
+      return await getMeApi();
+    } catch {
+      return rejectWithValue(null);
     }
   }
 );

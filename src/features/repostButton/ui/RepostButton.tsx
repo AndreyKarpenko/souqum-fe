@@ -17,7 +17,7 @@ export const RepostButton: FC<{ post: any }> = ({ post }) => {
 
   return (
     <div>
-      {user?.id !== post.author.id && (
+      {user?.accountId !== post.author.accountId && (
         <div
           className={`${post.isReposted ? 'text-blue-400' : 'cursor-pointer text-black'}`}
           onClick={() => {

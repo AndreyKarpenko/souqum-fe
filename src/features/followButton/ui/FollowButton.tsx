@@ -4,15 +4,11 @@ import type { FC } from 'react';
 
 export const FollowButton: FC<{ user: any }> = ({ user }) => {
   const follow = async () => {
-    await apiClient.post('subscriptions/follow', {
-      followingId: user?.id,
-    });
+    await apiClient.post(`user/subscribe/${user?.accountId}`);
   };
 
   const unfollow = async () => {
-    await apiClient.post('subscriptions/unfollow', {
-      followingId: user?.id,
-    });
+    await apiClient.delete(`user/unsubscribe/${user?.accountId}`);
   };
 
   return (

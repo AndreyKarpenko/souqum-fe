@@ -1,5 +1,5 @@
 import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { useCallback } from 'react';
@@ -14,16 +14,20 @@ type Inputs = {
 export const LoginForm = () => {
   const { register, handleSubmit } = useForm<Inputs>();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<Inputs> = useCallback(
     async ({ email, password }) => {
       try {
-        await dispatch(signInThunk({ email, password }));
+        const data = await dispatch(signInThunk({ email, password })).unwrap();
+        if (data.is2FAEnabled) {
+          navigate('/otp');
+        }
       } catch {
         /* empty */
       }
     },
-    [dispatch]
+    [dispatch, navigate]
   );
 
   return (

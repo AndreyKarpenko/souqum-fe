@@ -1,5 +1,6 @@
 export type AuthState = {
-  accessToken: string | null;
+  is2FAEnabled: boolean;
+  sid?: string;
   isLoading: boolean;
-  isLoggedIn: boolean;
+  isAuthenticated: boolean;
 };

@@ -14,32 +14,20 @@ import { FollowersPage } from '@/pages/Followers/ui/FollowersPage.tsx';
 import { FollowingPage } from '@/pages/Following/ui/FollowingPage.tsx';
 import { FeedPage } from '@/pages/Feeds/ui/FeedsPage.tsx';
 import { useSelector } from 'react-redux';
-import {
-  userIsLoggedInSelector,
-  userTokenIsLoadingSelector,
-  userTokenSelector,
-} from '@/entities/auth/redux';
+import { userIsAuthenticatedSelector } from '@/entities/auth/redux';
 import { UsersPage } from '@/pages/Users/ui/UsersPage.tsx';
+import OtpPage from '@/pages/Otp/ui/OtpPage.tsx';
+import EmailVerification from '@/pages/EmailVerification/ui/EmailVerification.tsx';
 
 const GuestRoute: FC<RouteProps> = ({ children }) => {
-  const isAuth = useSelector(userTokenSelector);
-  const isLoading = useSelector(userTokenIsLoadingSelector);
-  const isLoggedIn = useSelector(userIsLoggedInSelector);
-
-  if (isLoading && isLoggedIn) return null;
-  if (isAuth) return <Navigate to="/profile" replace />;
-
+  const isAuthenticated = useSelector(userIsAuthenticatedSelector);
+  if (isAuthenticated) return <Navigate to="/profile" replace />;
   return children;
 };
 
 const ProtectedRoute: FC<RouteProps> = ({ children }) => {
-  const isAuth = useSelector(userTokenSelector);
-  const isLoading = useSelector(userTokenIsLoadingSelector);
-  const isLoggedIn = useSelector(userIsLoggedInSelector);
-
-  if (isLoading && isLoggedIn) return null;
-  if (!isAuth) return <Navigate to="/" replace />;
-
+  const isAuthenticated = useSelector(userIsAuthenticatedSelector);
+  if (!isAuthenticated) return <Navigate to="/" replace />;
   return children;
 };
 
@@ -78,6 +66,22 @@ export const Router: FC = () => {
             element={
               <GuestRoute>
                 <ResetPasswordPage />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/otp"
+            element={
+              <GuestRoute>
+                <OtpPage />
+              </GuestRoute>
+            }
+          />
+          <Route
+            path="/email-verification"
+            element={
+              <GuestRoute>
+                <EmailVerification />
               </GuestRoute>
             }
           />

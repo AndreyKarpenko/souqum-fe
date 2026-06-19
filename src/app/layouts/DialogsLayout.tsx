@@ -5,21 +5,21 @@ import { userInfoSelector } from '@/entities/user/redux';
 import { useSelector } from 'react-redux';
 import { UserAvatar } from '@/features/userAvatar/ui/UserAvatar.tsx';
 import { UserAvatarType } from '@/features/userAvatar/model/types.ts';
-import { userTokenSelector } from '@/entities/auth/redux';
 import { DeleteButton } from '@/features/deletePostButton/ui/DeleteButton.tsx';
 import { DeleteButtonType } from '@/features/deletePostButton/model/types.ts';
+import { userIsAuthenticatedSelector } from '@/entities/auth/redux';
 
 export const DialogsLayout = () => {
   const [dialogs, setDialogs] = useState<any[]>([]);
   const user = useSelector(userInfoSelector);
-  const isAuth = useSelector(userTokenSelector);
+  const isAuthenticated = useSelector(userIsAuthenticatedSelector);
 
   const getDialogs = useCallback(async () => {
     try {
       const { data } = await apiClient.get('/dialogs');
       const a = data.map((dialog: any) => {
         const participants: any[] = dialog.participants.filter(
-          (participant: any) => participant.user.id !== user?.id
+          (participant: any) => participant.user.accountId !== user?.accountId
         );
         return {
           ...dialog,
@@ -30,13 +30,13 @@ export const DialogsLayout = () => {
     } catch {
       /* empty */
     }
-  }, [user?.id]);
+  }, [user?.accountId]);
 
   useEffect(() => {
-    if (isAuth) {
+    if (isAuthenticated) {
       void getDialogs();
     }
-  }, [getDialogs, isAuth]);
+  }, [getDialogs, isAuthenticated]);
 
   console.log(dialogs);
 

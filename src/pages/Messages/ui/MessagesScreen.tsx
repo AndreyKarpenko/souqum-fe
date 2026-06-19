@@ -41,11 +41,11 @@ export const MessagesScreen = () => {
   }, [params.id]);
 
   const sendMessage = async () => {
-    if (params.id && user?.id) {
+    if (params.id && user?.accountId) {
       const formData = new FormData();
       media.forEach((file) => formData.append('files', file)); // ключ 'files' одинаковый для всех
       formData.append('dialogId', params.id);
-      formData.append('authorId', user.id);
+      formData.append('authorId', user.accountId);
       formData.append('content', content);
 
       await apiClient.post(`/messages`, formData);

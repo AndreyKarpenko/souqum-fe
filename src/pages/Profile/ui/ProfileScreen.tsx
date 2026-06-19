@@ -31,11 +31,11 @@ export const ProfileScreen = () => {
   }, [dispatch, params.id]);
 
   const getUsersPosts = useCallback(async () => {
-    if (user?.id) {
-      const { data: posts } = await apiClient.get(`/posts/user/${user?.id}`);
+    if (user?.accountId) {
+      const { data: posts } = await apiClient.get(`/posts/user/${user?.accountId}`);
       setPosts(posts);
     }
-  }, [user?.id]);
+  }, [user?.accountId]);
 
   const closeModalHandler = () => {
     setShowModal(false);
@@ -43,7 +43,7 @@ export const ProfileScreen = () => {
 
   const createDialog = async () => {
     if (user) {
-      const { data } = await apiClient.post(`/dialogs`, { participantIds: [user?.id] });
+      const { data } = await apiClient.post(`/dialogs`, { participantIds: [user?.accountId] });
       navigate(`/messages/${data?.id}`);
     }
   };

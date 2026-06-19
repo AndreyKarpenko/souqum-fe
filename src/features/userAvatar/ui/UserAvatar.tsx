@@ -11,13 +11,15 @@ export const UserAvatar: FC<{ profile: any; type: UserAvatarType }> = ({ type, p
   const openProfileHandler = useCallback(
     (e: MouseEvent<HTMLElement>) => {
       e.preventDefault();
-      if (user?.id === profile.id) {
+
+      console.log(user, profile)
+      if (user?.accountId === profile.accountId) {
         navigate(`/profile`);
       } else {
-        navigate(`/profile/${profile.id}`);
+        navigate(`/profile/${profile.accountId}`);
       }
     },
-    [navigate, profile?.id, user?.id]
+    [navigate, profile?.accountId, user?.accountId]
   );
 
   const userAvatar = useMemo(() => {
@@ -33,7 +35,6 @@ export const UserAvatar: FC<{ profile: any; type: UserAvatarType }> = ({ type, p
           return <img src={profile?.avatar} alt="user_avatar" className={'h-10 w-10'} />;
         case UserAvatarType.dialogue:
           return <img src={profile?.avatar} alt="user_avatar" className={'h-10 w-10'} />;
-
         case UserAvatarType.header:
           return <img src={profile?.avatar} alt="user_avatar" className={'h-10 w-10'} />;
 
@@ -46,7 +47,9 @@ export const UserAvatar: FC<{ profile: any; type: UserAvatarType }> = ({ type, p
   return (
     <div
       onClick={openProfileHandler}
-      className={'cursor-pointer h-fit w-fit rounded-full bg-white border-2 border-black'}
+      className={
+        'overflow-hidden cursor-pointer h-fit w-fit rounded-full bg-white border-2 border-black'
+      }
     >
       {userAvatar}
     </div>

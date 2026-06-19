@@ -39,11 +39,11 @@ export const DeleteButton: FC<{
   const isAuthor = useMemo(() => {
     switch (type) {
       case DeleteButtonType.post:
-        return post?.author.id === user?.id;
+        return post?.author.accountId === user?.accountId;
       case DeleteButtonType.comment:
-        return comment?.author.id === user?.id;
+        return comment?.author.accountId === user?.accountId;
       case DeleteButtonType.message:
-        return message?.author.id === user?.id;
+        return message?.author.accountId === user?.accountId;
       case DeleteButtonType.dialog:
         return true;
       default:
@@ -51,10 +51,10 @@ export const DeleteButton: FC<{
     }
   }, [
     type,
-    post?.author.id,
-    user?.id,
-    comment?.author.id,
-    message?.author.id,
+    post?.author.accountId,
+    user?.accountId,
+    comment?.author.accountId,
+    message?.author.accountId,
     dialog?.participants,
   ]);
 
