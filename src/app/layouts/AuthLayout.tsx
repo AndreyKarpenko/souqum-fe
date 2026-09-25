@@ -50,8 +50,8 @@ export const AuthLayout = () => {
         </div>
         <div className={'flex flex-1 items-center justify-end gap-5'}>
           <UserAvatar profile={user} type={UserAvatarType.header} />
-          {user?.username}
-          {/*<LogOutButton />*/}
+          {user?.firstName}
+          {user?.lastName}
         </div>
       </header>
       <div className={'flex p-5 gap-5'}>

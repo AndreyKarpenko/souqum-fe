@@ -12,7 +12,6 @@ export const UserAvatar: FC<{ profile: any; type: UserAvatarType }> = ({ type, p
     (e: MouseEvent<HTMLElement>) => {
       e.preventDefault();
 
-      console.log(user, profile)
       if (user?.accountId === profile.accountId) {
         navigate(`/profile`);
       } else {

@@ -57,7 +57,7 @@ export const DialogsLayout = () => {
                   >
                     <DeleteButton type={DeleteButtonType.dialog} dialog={dialog} />
                     <UserAvatar profile={participant.user} type={UserAvatarType.dialogue} />
-                    {participant.user.username}
+                    {participant.user.firstName}
                   </div>
                 ))}
               </div>

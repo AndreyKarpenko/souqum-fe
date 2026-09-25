@@ -14,7 +14,7 @@ export const CommentContent: FC<{ comment: any }> = ({ comment }) => {
       <div className={'flex flex-row gap-5'}>
         <UserAvatar profile={comment.author} type={UserAvatarType.comment} />
         <div className={'flex flex-1 flex-col'}>
-          <div className={'text-lg'}> {comment.author.username}</div>
+          <div className={'text-lg'}> {comment.author.firstName}</div>
           <AttachmentWidget media={comment.media} />
           <div className={'text-md '}>{comment.content}</div>
           <div className={'text-xs text-gray-400'}>

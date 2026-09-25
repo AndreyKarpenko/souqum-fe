@@ -95,7 +95,7 @@ export const MessagesScreen = () => {
               <div className={`flex flex-1 gap-3 `}>
                 <UserAvatar profile={message.author} type={UserAvatarType.dialogue} />
                 <div className={`flex flex-1 flex-col`}>
-                  <div className={'text-lg'}>{message.author?.username}</div>
+                  <div className={'text-lg'}>{message.author?.firstName}</div>
                   <div className={'text-xs text-gray-400'}>
                     {dayjs(message.createdAt).format('YYYY-MM-DD HH:mm')}
                   </div>

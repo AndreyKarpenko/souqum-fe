@@ -13,7 +13,7 @@ export const PostContent: FC<{ post: any; isRepost?: boolean }> = ({ post, isRep
           type={isRepost ? UserAvatarType.repost : UserAvatarType.post}
         />
         <div className={'flex flex-col'}>
-          <div className={`${isRepost ? 'text-lg' : 'text-2xl'}`}>{post?.author?.username}</div>
+          <div className={`${isRepost ? 'text-lg' : 'text-2xl'}`}>{post?.author?.firstName}</div>
           <div className={`${isRepost ? 'text-xs' : 'text-sm'} text-gray-400`}>
             {new Date(post.createdAt).toDateString()}
           </div>
