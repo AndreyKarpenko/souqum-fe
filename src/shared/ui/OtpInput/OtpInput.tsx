@@ -2,10 +2,11 @@ import { type ClipboardEvent, type FC, type KeyboardEvent, useRef, useState } fr
 
 type OtpInputProps = {
   length?: number;
+  onChange?: (code: string) => void;
   onComplete: (code: string) => void;
 };
 
-export const OtpInput: FC<OtpInputProps> = ({ length = 6, onComplete }) => {
+export const OtpInput: FC<OtpInputProps> = ({ length = 6, onChange, onComplete }) => {
   const [values, setValues] = useState<string[]>(() => Array.from({ length }, () => ''));
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const isSubmittingRef = useRef(false);
@@ -33,6 +34,7 @@ export const OtpInput: FC<OtpInputProps> = ({ length = 6, onComplete }) => {
     next[index] = digit;
 
     setValues(next);
+    onChange?.(next.join(''));
 
     if (digit && index < length - 1) {
       focusInput(index + 1);
@@ -58,12 +60,13 @@ export const OtpInput: FC<OtpInputProps> = ({ length = 6, onComplete }) => {
     const nextValues = Array.from({ length }, (_, index) => pastedDigits[index] ?? '');
 
     setValues(nextValues);
+    onChange?.(nextValues.join(''));
     focusInput(Math.min(pastedDigits.length, length) - 1);
     completeIfReady(nextValues);
   };
 
   return (
-    <div className="flex justify-center gap-3">
+    <div className="flex justify-center gap-2">
       {values.map((value, index) => (
         <input
           key={index}
@@ -71,13 +74,14 @@ export const OtpInput: FC<OtpInputProps> = ({ length = 6, onComplete }) => {
             inputRefs.current[index] = element;
           }}
           value={value}
+          autoFocus={index === 0}
           inputMode="numeric"
           autoComplete={index === 0 ? 'one-time-code' : 'off'}
           maxLength={1}
           onChange={(event) => handleChange(index, event.target.value)}
           onKeyDown={(event) => handleKeyDown(index, event)}
           onPaste={handlePaste}
-          className="h-[50px] w-[50px] rounded-md border bg-white text-center text-xl focus:border-amber-400 focus:outline-none"
+          className="h-12 w-10 shrink-0 rounded-lg bg-[#F3EBDD] text-center text-lg text-[#032048] outline-none focus:ring-2 focus:ring-[#032048]/15"
         />
       ))}
     </div>

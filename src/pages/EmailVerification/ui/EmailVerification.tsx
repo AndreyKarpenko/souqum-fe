@@ -1,13 +1,13 @@
 import { useNavigate, useSearchParams } from 'react-router';
 import { useEffect, useMemo, useState } from 'react';
 import { verifyEmailVerificationApi } from '@/features/verifyEmail/api/verifyEmailApi.ts';
-import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
+import { AuthScreen } from '@/widgets/AuthDialog/ui/AuthScreen.tsx';
+import { AuthDialog, AuthSubmit } from '@/widgets/AuthDialog/ui/AuthDialog.tsx';
 
 function EmailVerification() {
   const [searchParams] = useSearchParams();
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
-
   const navigate = useNavigate();
 
   const token = useMemo(() => {
@@ -19,6 +19,7 @@ function EmailVerification() {
       setLoading(true);
       try {
         if (token) await verifyEmailVerificationApi({ token });
+        else throw new Error('missing token');
         setError(false);
       } catch {
         setError(true);
@@ -29,19 +30,26 @@ function EmailVerification() {
   }, [token]);
 
   return (
-    <div className={'flex flex-1 w-full'}>
-      <div className={'flex-1'} />
-
-      <div className={'flex flex-3 items-center'}>
-        <div
-          className={`${loading ? '' : error ? 'bg-red-300' : 'bg-green-300'} min-h-[100px] flex flex-2 flex-col xl:flex-col items-center justify-center rounded-2xl shadow overflow-hidden`}
-        >
-          <div>{error ? 'Verification failed' : 'Verification succeed'}</div>
-          {!error && <AppButton onClick={() => navigate('/signin')} title={'Login'} />}
-        </div>
-      </div>
-      <div className={'flex-1'} />
-    </div>
+    <AuthScreen>
+      <AuthDialog
+        title={loading ? 'Підтверджуємо пошту' : error ? 'Не вдалося підтвердити' : 'Пошту підтверджено'}
+        description={
+          loading
+            ? 'Зачекайте кілька секунд.'
+            : error
+              ? 'Посилання недійсне або вже використане.'
+              : 'Можна входити тим самим акаунтом.'
+        }
+      >
+        {!loading && (
+          <AuthSubmit
+            type="button"
+            title={error ? 'Повернутися до входу' : 'Увійти'}
+            onClick={() => navigate('/signin')}
+          />
+        )}
+      </AuthDialog>
+    </AuthScreen>
   );
 }
 

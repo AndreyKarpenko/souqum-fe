@@ -4,9 +4,17 @@ import { signOutThunk } from '@/features/auth/LogoutButton/model/signOutThunk.ts
 export const LogOutButton = () => {
   const dispatch = useThunkDispatch();
 
-  const logoutHandler = async () => {
-    dispatch(signOutThunk());
+  const logoutHandler = () => {
+    void dispatch(signOutThunk());
   };
 
-  return <div onClick={logoutHandler}>logout</div>;
+  return (
+    <button
+      type="button"
+      onClick={logoutHandler}
+      className="w-fit text-left text-xs font-medium text-[#032048]/55"
+    >
+      Вийти
+    </button>
+  );
 };

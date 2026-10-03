@@ -1,10 +1,9 @@
-import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
 import { Link, useNavigate } from 'react-router';
-import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import { useForm, type SubmitHandler } from 'react-hook-form';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useThunkDispatch } from '@/shared/lib/useThunkDispatch.ts';
 import { signInThunk } from '@/features/signIn/model/signInThunk.ts';
+import { AuthDialog, AuthField, AuthSocial, AuthSubmit } from '@/widgets/AuthDialog/ui/AuthDialog.tsx';
 
 type Inputs = {
   email: string;
@@ -15,39 +14,60 @@ export const LoginForm = () => {
   const { register, handleSubmit } = useForm<Inputs>();
   const dispatch = useThunkDispatch();
   const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const [pending, setPending] = useState(false);
 
   const onSubmit: SubmitHandler<Inputs> = useCallback(
     async ({ email, password }) => {
+      setError('');
+      setPending(true);
       try {
         const data = await dispatch(signInThunk({ email, password })).unwrap();
         if (data.is2FAEnabled) {
           navigate('/otp');
         }
       } catch {
-        /* empty */
+        setError('Не вдалося увійти. Перевірте пошту і пароль.');
+      } finally {
+        setPending(false);
       }
     },
     [dispatch, navigate]
   );
 
   return (
-    <form
-      className={'flex flex-col gap-5 p-5 pr-10 w-full bg-white'}
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <AppInput {...register('email')} title={'Email'} />
-      <AppInput {...register('password')} title={'Password'} />
-      <section className={'flex flex-1 justify-between items-center px-5'}>
-        <Link to={'/forgot-password'}>
-          <span className={'text-center text-[#f0505f] cursor-pointer'}>Forgot Password ?</span>
+    <AuthDialog title="Увійти" description="Той самий акаунт на хабі і на вітринах.">
+      <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
+        <AuthField
+          label="Ел. пошта"
+          type="email"
+          autoComplete="email"
+          placeholder="user@domain.com"
+          required
+          {...register('email', { required: true })}
+        />
+        <AuthField
+          label="Пароль"
+          type="password"
+          autoComplete="current-password"
+          required
+          {...register('password', { required: true })}
+        />
+        <div className="flex justify-end">
+          <Link to="/forgot-password" className="text-[13px] font-medium text-[#032048]">
+            Забули пароль?
+          </Link>
+        </div>
+        {error && <p className="text-center text-xs text-[#9b3b3b]">{error}</p>}
+        <AuthSubmit type="submit" title="Увійти" disabled={pending} />
+      </form>
+      <p className="mt-3 text-center text-[13px] text-[#6d675f]">
+        Немає акаунта —{' '}
+        <Link to="/signup" className="font-semibold text-[#032048]">
+          зареєструватися
         </Link>
-        <Link to={'/signup'}>
-          <span className={'text-center text-[#f0505f] cursor-pointer'}>
-            Don't have an account ?
-          </span>
-        </Link>
-      </section>
-      <AppButton type={'submit'} title={'Sign In'} />
-    </form>
+      </p>
+      <AuthSocial />
+    </AuthDialog>
   );
 };

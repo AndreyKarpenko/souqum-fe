@@ -1,9 +1,67 @@
-import axios, { type InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  AxiosError,
+  getAdapter,
+  type AxiosAdapter,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from 'axios';
+import { resolveDiscoverMock } from '@/shared/api/mock/discoverMock.ts';
+import { resolveMessagesMock } from '@/shared/api/mock/messagesMock.ts';
+import { resolveStoreMock } from '@/shared/api/mock/storeMock.ts';
+
+const requestPath = (config: InternalAxiosRequestConfig) => {
+  const url = config.url ?? '';
+  if (/^https?:\/\//.test(url)) return new URL(url).pathname;
+
+  const base =
+    config.baseURL && /^https?:\/\//.test(config.baseURL) ? config.baseURL : 'http://localhost';
+  return new URL(url, base.endsWith('/') ? base : `${base}/`).pathname;
+};
+
+let httpAdapter: AxiosAdapter | null = null;
+
+const getHttpAdapter = () => {
+  if (!httpAdapter) httpAdapter = getAdapter(axios.defaults.adapter);
+  return httpAdapter;
+};
+
+const mockingAdapter: AxiosAdapter = async (config) => {
+  const method = (config.method ?? 'get').toLowerCase();
+  const path = requestPath(config);
+
+  try {
+    const mocked =
+      (await resolveDiscoverMock(method, path, config.params, config.signal)) ??
+      (await resolveStoreMock(method, path, config.signal)) ??
+      (await resolveMessagesMock(method, path, config.signal, config.data));
+    if (!mocked) return getHttpAdapter()(config);
+
+    const response = {
+      data: mocked.data,
+      status: mocked.status,
+      statusText: mocked.status >= 400 ? 'Error' : 'OK',
+      headers: {},
+      config,
+    } as AxiosResponse;
+
+    if (mocked.status >= 400) {
+      throw new AxiosError('Request failed', AxiosError.ERR_BAD_REQUEST, config, null, response);
+    }
+
+    return response;
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new AxiosError('canceled', AxiosError.ERR_CANCELED, config);
+    }
+    throw error;
+  }
+};
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_HOST,
   timeout: 1000,
   withCredentials: true,
+  adapter: mockingAdapter,
 });
 let requestInterceptor: number | null = null;
 let responseInterceptor: number | null = null;

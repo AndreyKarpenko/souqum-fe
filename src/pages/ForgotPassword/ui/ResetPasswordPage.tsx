@@ -1,9 +1,10 @@
-import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
-import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { resetPasswordApi } from '@/features/resetPassword/api/resetPasswordApi.ts';
-import { useCallback, useMemo } from 'react';
-import { useSearchParams } from 'react-router';
+import { useCallback, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
+import { AuthScreen } from '@/widgets/AuthDialog/ui/AuthScreen.tsx';
+import { AuthDialog, AuthField, AuthSubmit } from '@/widgets/AuthDialog/ui/AuthDialog.tsx';
+
 type Inputs = {
   password: string;
   confirmPassword: string;
@@ -12,6 +13,9 @@ type Inputs = {
 function ResetPasswordPage() {
   const { register, handleSubmit } = useForm<Inputs>();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const [pending, setPending] = useState(false);
 
   const token = useMemo(() => {
     return searchParams.get('token');
@@ -19,33 +23,51 @@ function ResetPasswordPage() {
 
   const onSubmit: SubmitHandler<Inputs> = useCallback(
     async ({ password, confirmPassword }) => {
-      if (password === confirmPassword && token) {
+      setError('');
+      if (password !== confirmPassword) {
+        setError('Паролі не збігаються.');
+        return;
+      }
+      if (!token) {
+        setError('Посилання недійсне. Запросіть лист ще раз.');
+        return;
+      }
+      setPending(true);
+      try {
         await resetPasswordApi({ token, password });
+        navigate('/signin');
+      } catch {
+        setError('Не вдалося зберегти пароль.');
+      } finally {
+        setPending(false);
       }
     },
-    [token]
+    [navigate, token]
   );
 
   return (
-    <div className={'flex flex-1 '}>
-      <div className={'flex-1 '} />
-
-      <div className={'flex flex-2'}>
-        <div className="flex flex-2 bottom-3/6 absolute w-1/3 flex-col h-1/3 rounded-2xl p-5 gap-5 shadow bg-white">
-          <form
-            className={'flex flex-col gap-5 p-5 pr-10 w-full bg-white'}
-            onSubmit={handleSubmit(onSubmit)}
-          >
-            <AppInput {...register('password')} title={'Password'} />
-            <AppInput {...register('confirmPassword')} title={'Confirm Password'} />
-            <AppButton type={'submit'} title={'Send'} />
-          </form>
-        </div>
-      </div>
-      <div className={'flex-1'} />
-
-      <div className={'flex-2'} />
-    </div>
+    <AuthScreen>
+      <AuthDialog title="Придумайте пароль" description="Посилання з листа відкрило це вікно.">
+        <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
+          <AuthField
+            label="Новий пароль"
+            type="password"
+            autoComplete="new-password"
+            required
+            {...register('password', { required: true })}
+          />
+          <AuthField
+            label="Ще раз"
+            type="password"
+            autoComplete="new-password"
+            required
+            {...register('confirmPassword', { required: true })}
+          />
+          {error && <p className="text-center text-xs text-[#9b3b3b]">{error}</p>}
+          <AuthSubmit type="submit" title="Зберегти пароль" disabled={pending} />
+        </form>
+      </AuthDialog>
+    </AuthScreen>
   );
 }
 

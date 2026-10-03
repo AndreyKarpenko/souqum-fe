@@ -1,75 +1,35 @@
-import { Link, Outlet } from 'react-router';
-import Logo from '@/app/assets/logo.png';
-import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
-import { useSelector } from 'react-redux';
-import { userInfoSelector } from '@/entities/user';
-import { UserAvatar } from '@/entities/user';
-import { profilePath } from '@/shared/config/profilePath.ts';
-import { LogOutButton } from '@/features/auth/LogoutButton/ui/LogOutButton.tsx';
+import { useEffect, useState } from 'react';
+import { Outlet, useLocation } from 'react-router';
+import { AppHeader } from '@/app/layouts/AppHeader.tsx';
+import { AppSidebar } from '@/app/layouts/AppSidebar.tsx';
 
-const menuItems = [
-  'Profile',
-  'Feeds',
-  'Messages',
-  'Wallet',
-  'Purchase',
-  'Users',
-  'Followers',
-  'Following',
-  'Communities',
-  'Shops',
-  'Streams',
-  'Multimedia',
-  'Settings',
-];
 export const AuthLayout = () => {
-  const user = useSelector(userInfoSelector);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false);
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [menuOpen]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-200">
-      <header className={'flex px-5 gap-5 items-center bg-[#f0505f]'}>
-        <div className="flex flex-1 ">
-          <div className={'h-[80px] w-[80px] rounded-full bg-white'}>
-            <img className={'h-[80px]'} src={Logo} alt={'logo'} />
-          </div>
-        </div>
-        <div className={'flex flex-5 gap-5 items-center'}>
-          <LogOutButton />
-          <div className={'flex flex-2 items-center justify-center gap-3'}>
-            My stores
-            <div className={'flex'}>
-              <div className={'h-[40px] w-[40px] border rounded-full bg-white'} />
-              <div className={'h-[40px] w-[40px] border ml-[-20px] rounded-full bg-white'} />
-              <div className={'h-[40px] w-[40px] border ml-[-20px] rounded-full bg-white'} />
-            </div>
-            +2
-          </div>
-          <div className={'flex flex-3'}>
-            <AppInput title={''} />
-          </div>
-        </div>
-        <div className={'flex flex-1 items-center justify-end gap-5'}>
-          {user?.accountId && (
-            <Link to={profilePath(user.accountId, user.accountId)}>
-              <UserAvatar user={user} />
-            </Link>
-          )}
-          {user?.firstName}
-          {user?.lastName}
-        </div>
-      </header>
-      <div className={'flex p-5 gap-5'}>
-        <div className={'flex flex-1 gap-5 h-fit flex-col'}>
-          {menuItems.map((menuItem) => (
-            <Link key={menuItem} to={`/${menuItem.toLowerCase()}`}>
-              <div className={'text-2xl cursor-pointer'}>{menuItem}</div>
-            </Link>
-          ))}
-        </div>
-        <div className={'flex flex-5'}>
+    <div className="flex h-screen overflow-hidden bg-[#F6F0E4] text-[#032048] [font-family:Manrope,sans-serif]">
+      <AppSidebar open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <AppHeader menuOpen={menuOpen} onMenuClick={() => setMenuOpen((open) => !open)} />
+        <main className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4 lg:px-8 lg:py-6">
           <Outlet />
-        </div>
-        <div className={'flex flex-1'} />
+        </main>
       </div>
     </div>
   );

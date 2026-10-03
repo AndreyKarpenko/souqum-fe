@@ -1,0 +1,16 @@
+export const appNavItems = [
+  { label: 'Profile', to: '/profile' },
+  { label: 'Feeds', to: '/feeds' },
+  { label: 'Discover', to: '/discover' },
+  { label: 'Messages', to: '/messages' },
+  { label: 'Wallet', to: '/wallet' },
+  { label: 'Purchase', to: '/purchase' },
+  { label: 'Users', to: '/users' },
+  { label: 'Followers', to: '/followers' },
+  { label: 'Following', to: '/following' },
+  { label: 'Communities', to: '/communities' },
+  { label: 'Shops', to: '/shops' },
+  { label: 'Streams', to: '/streams' },
+  { label: 'Multimedia', to: '/multimedia' },
+  { label: 'Settings', to: '/settings' },
+] as const;

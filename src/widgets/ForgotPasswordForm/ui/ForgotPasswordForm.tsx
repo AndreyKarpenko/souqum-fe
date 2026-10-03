@@ -1,46 +1,61 @@
-import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
-import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import { type FC, useCallback, useState } from 'react';
+import { Link } from 'react-router';
 import { forgotPasswordApi } from '@/features/forgotPassword/api/forgotPasswordApi.ts';
 import { type SubmitHandler, useForm } from 'react-hook-form';
-import { createPortal } from '@/shared/utils/createPortal.tsx';
-import { ForgotPasswordFeedbackModal } from '@/widgets/ForgotPasswordForm/ui/ForgotPasswordFeedbackModal.tsx';
+import { AuthDialog, AuthField, AuthSubmit } from '@/widgets/AuthDialog/ui/AuthDialog.tsx';
+import { ConfirmEmailCard } from '@/widgets/AuthDialog/ui/ConfirmEmailCard.tsx';
 
 type Inputs = {
   email: string;
 };
 
-export const ForgotPasswordForm: FC<{ style?: any }> = ({ style }) => {
+export const ForgotPasswordForm: FC = () => {
   const { register, handleSubmit } = useForm<Inputs>();
+  const [sentEmail, setSentEmail] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const [pending, setPending] = useState(false);
 
   const onSubmit: SubmitHandler<Inputs> = useCallback(async ({ email }) => {
+    setError('');
+    setPending(true);
     try {
       await forgotPasswordApi({ email });
-      setShowModal(true);
+      setSentEmail(email);
     } catch {
-      /* empty */
+      setError('Не вдалося надіслати лист. Перевірте пошту.');
+    } finally {
+      setPending(false);
     }
   }, []);
 
-  const [showModal, setShowModal] = useState(false);
-
-  const closeModalHandler = () => {
-    setShowModal(false);
-  };
-
-  const feedbackModal = () =>
-    createPortal(<ForgotPasswordFeedbackModal onClose={closeModalHandler} />);
+  if (sentEmail) {
+    return (
+      <ConfirmEmailCard
+        email={sentEmail}
+        onResend={async () => {
+          await forgotPasswordApi({ email: sentEmail });
+        }}
+      />
+    );
+  }
 
   return (
-    <div style={style} className={'flex flex-col justify-center p-5 gap-5 w-full bg-white'}>
-      <form
-        className={'flex flex-col gap-5 p-5 pr-10 w-full bg-white'}
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <AppInput {...register('email')} title={'Email'} />
-        <AppButton type={'submit'} title={'Send'} />
+    <AuthDialog title="Новий пароль" description="Надішлемо посилання на пошту.">
+      <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
+        <AuthField
+          label="Ел. пошта"
+          type="email"
+          autoComplete="email"
+          placeholder="user@domain.com"
+          required
+          {...register('email', { required: true })}
+        />
+        {error && <p className="text-center text-xs text-[#9b3b3b]">{error}</p>}
+        <AuthSubmit type="submit" title="Надіслати посилання" disabled={pending} />
       </form>
-      {showModal && feedbackModal()}
-    </div>
+      <Link to="/signin" className="mt-3 block text-center text-[13px] font-medium text-[#032048]">
+        Повернутися до входу
+      </Link>
+    </AuthDialog>
   );
 };

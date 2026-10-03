@@ -1,127 +1,195 @@
-import { Link, useParams } from 'react-router';
-import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
-import { getMessagesApi, sendMessageApi } from '@/entities/message';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { UserAvatar } from '@/entities/user';
-import { profilePath } from '@/shared/config/profilePath.ts';
-import { useSelector } from 'react-redux';
-import { userInfoSelector } from '@/entities/user';
-import { SocketApi } from '@/shared/api/socket';
-import type { User } from '@/entities/user';
-import dayjs from 'dayjs';
-import { DeleteButton } from '@/features/deletePostButton/ui/DeleteButton.tsx';
-import { DeleteButtonType } from '@/features/deletePostButton/model/types.ts';
-import { UploadImage, type UploadImageRef } from '@/shared/ui/UploadImage/UploadImage.tsx';
-import * as React from 'react';
-import { AttachmentList } from '@/features/attachedImage/ui/AttachmentList.tsx';
+import { useEffect, useState, type FC } from 'react';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
+import type { InboxConversation } from '@/entities/inbox';
+import { useInbox } from '@/pages/Messages/model/useInbox.ts';
+import { useStore } from '@/pages/Store/model/useStore.ts';
+import { ConversationList } from '@/pages/Messages/ui/ConversationList.tsx';
+import { ThreadView } from '@/pages/Messages/ui/ThreadView.tsx';
 
-export type MessageDto = {
-  id: string;
-  dialogId: string;
-  author: User;
-  authorId: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-  media: any[];
-};
+const byStore = (conversations: InboxConversation[], storeId: string) =>
+  storeId === 'all' ? conversations : conversations.filter((item) => item.storeId === storeId);
 
-export const MessagesScreen = () => {
-  const params = useParams<{ id: string }>();
-  const [messages, setMessages] = useState<MessageDto[]>([]);
-  const [content, setContent] = useState<string>('');
-  const user = useSelector(userInfoSelector);
-  const socket = SocketApi.socket;
+const draftFor = (storeId: string, storeName: string): InboxConversation => ({
+  id: `draft-${storeId}`,
+  title: storeName,
+  preview: '',
+  storeId,
+  storeName,
+  avatar: 'warm',
+  subtitle: 'Ви пишете магазину',
+  mine: true,
+  messages: [],
+});
 
-  const getAllMessages = useCallback(async () => {
-    if (params.id) {
-      const data = await getMessagesApi(params.id);
-      setMessages(data);
+export const MessagesScreen: FC = () => {
+  const {
+    feed,
+    status,
+    reload,
+    send,
+    sending,
+    sendError,
+    removeConversation,
+    removeMessage,
+    pendingDelete,
+    deleteError,
+  } = useInbox();
+  const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const composeStoreId = searchParams.get('store') || undefined;
+  const composeStore = useStore(composeStoreId);
+  const navigate = useNavigate();
+  const [storeId, setStoreId] = useState('all');
+  const [threadOpen, setThreadOpen] = useState(Boolean(id) || Boolean(composeStoreId));
+
+  useEffect(() => {
+    if (id || composeStoreId) setThreadOpen(true);
+  }, [id, composeStoreId]);
+
+  if (status === 'loading') return <InboxSkeleton />;
+
+  if (status === 'error' || !feed) {
+    return (
+      <div className="rounded-[20px] bg-white px-6 py-12 text-center">
+        <p className="text-sm text-[#032048]">Не вдалося завантажити повідомлення</p>
+        <button
+          type="button"
+          className="mt-4 h-10 cursor-pointer rounded-full bg-[#032048] px-5 text-sm font-medium text-white"
+          onClick={reload}
+        >
+          Спробувати ще раз
+        </button>
+      </div>
+    );
+  }
+
+  const outgoing = composeStoreId
+    ? feed.conversations.find((item) => item.mine && item.storeId === composeStoreId)
+    : undefined;
+
+  if (outgoing) return <Navigate to={`/messages/${outgoing.id}`} replace />;
+
+  const drafting = Boolean(composeStoreId);
+  const draft =
+    drafting && composeStore.profile ? draftFor(composeStore.profile.id, composeStore.profile.name) : null;
+  const visible = byStore(feed.conversations, storeId);
+  const selected = drafting ? null : (visible.find((item) => item.id === id) ?? visible[0] ?? null);
+  const thread = draft ?? selected;
+
+  const openConversation = (conversationId: string) => {
+    navigate(`/messages/${conversationId}`);
+    setThreadOpen(true);
+  };
+
+  const sendMessage = async (text: string) => {
+    const target = draft ?? selected;
+    if (!target) return false;
+    const conversation = await send({
+      storeId: target.storeId,
+      text,
+      conversationId: draft ? undefined : target.id,
+    });
+    if (!conversation) return false;
+    if (draft) navigate(`/messages/${conversation.id}`, { replace: true });
+    return true;
+  };
+
+  const deleteConversation = async (conversationId: string) => {
+    const wasOpen = !draft && (selected?.id === conversationId || id === conversationId);
+    const removed = await removeConversation(conversationId);
+    if (!removed || !feed) return;
+
+    const remaining = feed.conversations.filter((item) => item.id !== conversationId);
+    if (storeId !== 'all' && !remaining.some((item) => item.storeId === storeId)) setStoreId('all');
+    if (!wasOpen) return;
+
+    const nextPool = storeId === 'all' ? remaining : remaining.filter((item) => item.storeId === storeId);
+    if (nextPool[0]) {
+      navigate(`/messages/${nextPool[0].id}`, { replace: true });
+      setThreadOpen(true);
+      return;
     }
-  }, [params.id]);
+    navigate('/messages', { replace: true });
+    setThreadOpen(false);
+  };
 
-  const sendMessage = async () => {
-    if (params.id && user?.accountId) {
-      const formData = new FormData();
-      media.forEach((file) => formData.append('files', file)); // ключ 'files' одинаковый для всех
-      formData.append('dialogId', params.id);
-      formData.append('authorId', user.accountId);
-      formData.append('content', content);
+  const deleteMessage = (messageId: string) => {
+    if (!thread || thread.id.startsWith('draft-')) return;
+    void removeMessage(thread.id, messageId);
+  };
 
-      await sendMessageApi(formData);
+  const changeStore = (nextStoreId: string) => {
+    setStoreId(nextStoreId);
+    const nextVisible = byStore(feed.conversations, nextStoreId);
+    if (nextVisible.some((item) => item.id === selected?.id)) return;
+    if (nextVisible[0]) {
+      navigate(`/messages/${nextVisible[0].id}`, { replace: true });
+      return;
     }
+    navigate('/messages', { replace: true });
   };
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
-  };
-
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const handleReceive = (data: MessageDto) => {
-    setMessages((prev) => [...prev, data]);
-  };
-
-  const handleDelete = (data: string) => {
-    setMessages((prev) => prev.filter((item) => item.id !== data));
-  };
-
-  useEffect(() => {
-    containerRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  useEffect(() => {
-    void getAllMessages();
-  }, [getAllMessages]);
-
-  useEffect(() => {
-    socket?.on('receiveMessage', handleReceive);
-    socket?.on('deleteMessage', handleDelete);
-    return () => {
-      socket?.off('receiveMessage', handleReceive);
-      socket?.off('deleteMessage', handleDelete);
-    };
-  }, [params.id, socket]);
-
-  const uploadImageRef = useRef<UploadImageRef>(null);
-  const [media, setMedia] = useState<any[]>([]);
+  const deletingConversationId = pendingDelete?.startsWith('conversation:')
+    ? pendingDelete.slice('conversation:'.length)
+    : null;
+  const deletingMessageId = pendingDelete?.startsWith('message:')
+    ? pendingDelete.slice('message:'.length)
+    : null;
 
   return (
-    <>
-      <div className={'flex flex-col h-[80vh] flex-4'}>
-        <div className={'gap-5 flex flex-col flex-4 overflow-scroll'}>
-          {messages.map((message) => (
-            <div key={message.id} className={`flex-row p-3 rounded-2xl flex 'items-start'}`}>
-              <div className={`flex flex-1 gap-3 `}>
-                {message.author?.accountId && (
-                  <Link to={profilePath(message.author.accountId, user?.accountId)}>
-                    <UserAvatar user={message.author} />
-                  </Link>
-                )}
-                <div className={`flex flex-1 flex-col`}>
-                  <div className={'text-lg'}>{message.author?.firstName}</div>
-                  <div className={'text-xs text-gray-400'}>
-                    {dayjs(message.createdAt).format('YYYY-MM-DD HH:mm')}
-                  </div>
-                  <AttachmentList media={message.media} />
-                  <div>{message.content}</div>
-                </div>
-              </div>
-              <DeleteButton type={DeleteButtonType.message} message={message} />
-            </div>
-          ))}
-          <div ref={containerRef} />
-        </div>
-        <textarea onChange={handleTextChange} className={'bg-white p-3 min-h-30 resize-none'} />
-        <AppButton disabled={!content} onClick={sendMessage} title={'Send'} />
-        <AppButton onClick={uploadImageRef.current?.handleClick} title={'Upload image'} />
-
-        <div className={'m-5'}>
-          <UploadImage ref={uploadImageRef} onChange={setMedia} />
-        </div>
+    <div className="flex min-h-0 flex-1 flex-col gap-3">
+      {deleteError && <p className="text-sm text-[#C4564E]">{deleteError}</p>}
+      <div className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row">
+      <ConversationList
+        filters={feed.filters}
+        storeId={storeId}
+        conversations={visible}
+        selectedId={draft ? null : (selected?.id ?? null)}
+        threadOpen={threadOpen}
+        deletingId={deletingConversationId}
+        onStoreChange={changeStore}
+        onSelect={openConversation}
+        onDelete={(conversationId) => void deleteConversation(conversationId)}
+      />
+      <div className={threadOpen ? 'flex min-h-0 min-w-0 flex-1' : 'hidden min-h-0 min-w-0 flex-1 lg:flex'}>
+        {drafting && !draft ? (
+          <section className="flex min-h-0 min-w-0 flex-1 items-center justify-center rounded-[20px] bg-[#FBF8F1] px-6">
+            <p className="text-sm text-[#032048]/60">
+              {composeStore.status === 'missing' || composeStore.status === 'error'
+                ? 'Магазин не знайдено'
+                : 'Завантаження діалогу'}
+            </p>
+          </section>
+        ) : (
+          <ThreadView
+            conversation={thread}
+            sending={sending}
+            sendError={sendError}
+            deletingMessageId={deletingMessageId}
+            deletingConversation={Boolean(thread && deletingConversationId === thread.id)}
+            onBack={() => setThreadOpen(false)}
+            onSend={sendMessage}
+            onDeleteMessage={deleteMessage}
+            onDeleteConversation={() => {
+              if (thread) void deleteConversation(thread.id);
+            }}
+          />
+        )}
       </div>
-    </>
+      </div>
+    </div>
   );
 };
+
+const InboxSkeleton: FC = () => (
+  <div
+    className="flex min-h-0 flex-1 flex-col gap-4 lg:flex-row"
+    aria-busy="true"
+    aria-label="Завантаження повідомлень"
+  >
+    <div className="h-72 animate-pulse rounded-[20px] bg-white/80 lg:h-auto lg:w-[380px]" />
+    <div className="min-h-72 flex-1 animate-pulse rounded-[20px] bg-white/80" />
+  </div>
+);
 
 export default MessagesScreen;
