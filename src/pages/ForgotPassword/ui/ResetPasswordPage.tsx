@@ -1,7 +1,7 @@
 import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import { type SubmitHandler, useForm } from 'react-hook-form';
-import { resetPasswordApi } from '@/entities/auth/api/authService.tsx';
+import { resetPasswordApi } from '@/features/resetPassword/api/resetPasswordApi.ts';
 import { useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 type Inputs = {

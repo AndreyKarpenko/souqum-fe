@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router';
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { useCallback } from 'react';
-import { useAppDispatch } from '@/app/store/useAppDispatch.ts';
-import { signInThunk } from '@/entities/auth/redux';
+import { useThunkDispatch } from '@/shared/lib/useThunkDispatch.ts';
+import { signInThunk } from '@/features/signIn/model/signInThunk.ts';
 
 type Inputs = {
   email: string;
@@ -13,7 +13,7 @@ type Inputs = {
 
 export const LoginForm = () => {
   const { register, handleSubmit } = useForm<Inputs>();
-  const dispatch = useAppDispatch();
+  const dispatch = useThunkDispatch();
   const navigate = useNavigate();
 
   const onSubmit: SubmitHandler<Inputs> = useCallback(

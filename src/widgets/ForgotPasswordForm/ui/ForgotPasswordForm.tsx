@@ -1,10 +1,10 @@
 import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import { type FC, useCallback, useState } from 'react';
-import { forgotPasswordApi } from '@/entities/auth/api/authService.tsx';
+import { forgotPasswordApi } from '@/features/forgotPassword/api/forgotPasswordApi.ts';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { createPortal } from '@/shared/utils/createPortal.tsx';
-import { ForgotPasswordFeedbackModal } from '@/widgets/ForgotPasswordFeedbackModal/ui/ForgotPasswordFeedbackModal.tsx';
+import { ForgotPasswordFeedbackModal } from '@/widgets/ForgotPasswordForm/ui/ForgotPasswordFeedbackModal.tsx';
 
 type Inputs = {
   email: string;

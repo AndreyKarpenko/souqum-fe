@@ -2,11 +2,12 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { useSelector } from 'react-redux';
 import { OtpInput } from '@/shared/ui/OtpInput/OtpInput.tsx';
-import { useAppDispatch } from '@/app/store/useAppDispatch.ts';
-import { userSidSelector, verifyOtpThunk } from '@/entities/auth/redux';
+import { useThunkDispatch } from '@/shared/lib/useThunkDispatch.ts';
+import { userSidSelector } from '@/entities/auth';
+import { verifyOtpThunk } from '@/features/verifyOtp/model/verifyOtpThunk.ts';
 
 export const OtpForm = () => {
-  const dispatch = useAppDispatch();
+  const dispatch = useThunkDispatch();
   const navigate = useNavigate();
   const sid = useSelector(userSidSelector);
 

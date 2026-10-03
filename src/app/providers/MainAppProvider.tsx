@@ -1,6 +1,6 @@
 import React, { type FC, useEffect } from 'react';
 import { useAppDispatch } from '@/app/store/useAppDispatch.ts';
-import { checkSessionThunk } from '@/entities/auth/redux';
+import { checkSessionThunk } from '@/features/checkSession/model/checkSessionThunk.ts';
 
 let sessionCheckStarted = false;
 

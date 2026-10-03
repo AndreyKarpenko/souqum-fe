@@ -1,6 +1,6 @@
 import { type FC, useState } from 'react';
 import { createPortal } from '@/shared/utils/createPortal.tsx';
-import { ImageViewModal } from '@/widgets/ImageViewModal/ui/ImageViewModal.tsx';
+import { ImageViewModal } from '@/features/attachedImage/ui/ImageViewModal.tsx';
 
 export const AttachedImage: FC<{ url: string }> = ({ url }) => {
   const [showModal, setShowModal] = useState(false);

@@ -1,19 +1,9 @@
-import { type FC, useState } from 'react';
-import { createPortal } from '@/shared/utils/createPortal.tsx';
-import { CreatePostModal } from '@/widgets/CreatePostModal/ui/CreatePostModal.tsx';
+import { type FC } from 'react';
 import { useSelector } from 'react-redux';
-import { userInfoSelector } from '@/entities/user/redux';
+import { userInfoSelector } from '@/entities/user';
 
-export const RepostButton: FC<{ post: any }> = ({ post }) => {
-  const [showModal, setShowModal] = useState(false);
+export const RepostButton: FC<{ post: any; onRepost: () => void }> = ({ post, onRepost }) => {
   const user = useSelector(userInfoSelector);
-
-  const closeModalHandler = () => {
-    setShowModal(false);
-  };
-
-  const repostPostModal = () =>
-    createPortal(<CreatePostModal post={post} onClose={closeModalHandler} />);
 
   return (
     <div>
@@ -22,14 +12,13 @@ export const RepostButton: FC<{ post: any }> = ({ post }) => {
           className={`${post.isReposted ? 'text-blue-400' : 'cursor-pointer text-black'}`}
           onClick={() => {
             if (!post.isReposted) {
-              setShowModal(true);
+              onRepost();
             }
           }}
         >
           Repost {!!post._count.reposts && post._count.reposts}
         </div>
       )}
-      {showModal && repostPostModal()}
     </div>
   );
 };

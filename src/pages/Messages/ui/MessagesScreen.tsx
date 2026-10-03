@@ -1,19 +1,19 @@
-import { useParams } from 'react-router';
+import { Link, useParams } from 'react-router';
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
-import apiClient from '@/app/api/apiClient.tsx';
+import { getMessagesApi, sendMessageApi } from '@/entities/message';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { UserAvatar } from '@/features/userAvatar/ui/UserAvatar.tsx';
-import { UserAvatarType } from '@/features/userAvatar/model/types.ts';
+import { UserAvatar } from '@/entities/user';
+import { profilePath } from '@/shared/config/profilePath.ts';
 import { useSelector } from 'react-redux';
-import { userInfoSelector } from '@/entities/user/redux';
-import { SocketApi } from '@/app/configs/socket/socket.ts';
-import type { User } from '@/entities/user/model/types.ts';
+import { userInfoSelector } from '@/entities/user';
+import { SocketApi } from '@/shared/api/socket';
+import type { User } from '@/entities/user';
 import dayjs from 'dayjs';
 import { DeleteButton } from '@/features/deletePostButton/ui/DeleteButton.tsx';
 import { DeleteButtonType } from '@/features/deletePostButton/model/types.ts';
-import { UploadImage, type UploadImageRef } from '@/widgets/UploadImage/ui/UploadImage.tsx';
+import { UploadImage, type UploadImageRef } from '@/shared/ui/UploadImage/UploadImage.tsx';
 import * as React from 'react';
-import { AttachmentWidget } from '@/widgets/AttachmentWidget/ui/AttachmentWidget.tsx';
+import { AttachmentList } from '@/features/attachedImage/ui/AttachmentList.tsx';
 
 export type MessageDto = {
   id: string;
@@ -35,7 +35,7 @@ export const MessagesScreen = () => {
 
   const getAllMessages = useCallback(async () => {
     if (params.id) {
-      const { data } = await apiClient.get(`/messages/${params.id}`);
+      const data = await getMessagesApi(params.id);
       setMessages(data);
     }
   }, [params.id]);
@@ -48,7 +48,7 @@ export const MessagesScreen = () => {
       formData.append('authorId', user.accountId);
       formData.append('content', content);
 
-      await apiClient.post(`/messages`, formData);
+      await sendMessageApi(formData);
     }
   };
 
@@ -93,13 +93,17 @@ export const MessagesScreen = () => {
           {messages.map((message) => (
             <div key={message.id} className={`flex-row p-3 rounded-2xl flex 'items-start'}`}>
               <div className={`flex flex-1 gap-3 `}>
-                <UserAvatar profile={message.author} type={UserAvatarType.dialogue} />
+                {message.author?.accountId && (
+                  <Link to={profilePath(message.author.accountId, user?.accountId)}>
+                    <UserAvatar user={message.author} />
+                  </Link>
+                )}
                 <div className={`flex flex-1 flex-col`}>
                   <div className={'text-lg'}>{message.author?.firstName}</div>
                   <div className={'text-xs text-gray-400'}>
                     {dayjs(message.createdAt).format('YYYY-MM-DD HH:mm')}
                   </div>
-                  <AttachmentWidget media={message.media} />
+                  <AttachmentList media={message.media} />
                   <div>{message.content}</div>
                 </div>
               </div>

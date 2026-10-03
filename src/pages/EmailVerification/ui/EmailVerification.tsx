@@ -1,6 +1,6 @@
 import { useNavigate, useSearchParams } from 'react-router';
 import { useEffect, useMemo, useState } from 'react';
-import { verifyEmailVerificationApi } from '@/entities/auth/api/authService.tsx';
+import { verifyEmailVerificationApi } from '@/features/verifyEmail/api/verifyEmailApi.ts';
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 
 function EmailVerification() {

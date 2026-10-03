@@ -3,9 +3,9 @@ import { Link } from 'react-router';
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import { type SubmitHandler, useForm } from 'react-hook-form';
 import { useCallback, useState } from 'react';
-import { signUpApi } from '@/entities/auth/api/authService.tsx';
+import { signUpApi } from '@/features/signUp/api/signUpApi.ts';
 import { createPortal } from '@/shared/utils/createPortal.tsx';
-import { VerifyEmailModal } from '@/widgets/VerifyEmailModal/ui/VerifyEmailModal.tsx';
+import { VerifyEmailModal } from '@/widgets/RegisterForm/ui/VerifyEmailModal.tsx';
 
 type Inputs = {
   email: string;

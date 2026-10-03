@@ -1,5 +1,6 @@
-import type { CoreReduxState } from '@/app/model/types.ts';
+import type { AuthState } from '@/entities/auth/model/types.ts';
 
-export const userTokenIsLoadingSelector = ({ auth }: CoreReduxState) => auth.isLoading;
-export const userIsAuthenticatedSelector = ({ auth }: CoreReduxState) => auth.isAuthenticated;
-export const userSidSelector = ({ auth }: CoreReduxState) => auth.sid;
+export const userTokenIsLoadingSelector = (state: { auth: AuthState }) => state.auth.isLoading;
+export const userIsAuthenticatedSelector = (state: { auth: AuthState }) =>
+  state.auth.isAuthenticated;
+export const userSidSelector = (state: { auth: AuthState }) => state.auth.sid;

@@ -1,9 +1,9 @@
 import { Outlet } from 'react-router';
-import Logo from '../../assets/logo.png';
+import Logo from '@/app/assets/logo.png';
 
 export const MainLayout = () => {
   return (
-    <div className="flex flex-col min-h-screen bg-gray-200">
+    <div className="flex flex-col min-h-screen bg-[#F6F0E4]">
       <header className={'flex px-5 gap-5 items-center bg-[#f0505f]'}>
         <div className="flex flex-1 ">
           <div className={'h-[80px] w-[80px] rounded-full bg-white'}>

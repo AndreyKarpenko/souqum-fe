@@ -1,23 +1,24 @@
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
 import { createPortal } from '@/shared/utils/createPortal.tsx';
 import { useCallback, useEffect, useState } from 'react';
-import apiClient from '@/app/api/apiClient.tsx';
 import { useNavigate, useParams } from 'react-router';
-import { CreatePostModal } from '@/widgets/CreatePostModal/ui/CreatePostModal.tsx';
-import { PostsList } from '@/widgets/PostsList/ui/PostsList.tsx';
+import { CreatePostModal } from '@/widgets/post/ui/CreatePostModal.tsx';
+import { PostsList } from '@/widgets/post/ui/PostsList.tsx';
 import { FollowButton } from '@/features/followButton/ui/FollowButton.tsx';
-import { useAppDispatch } from '@/app/store/useAppDispatch.ts';
-import { getUserProfileApi } from '@/entities/user/api/userService.tsx';
-import { getMyProfileThunk } from '@/entities/user/redux/thunk.ts';
-import type { User } from '@/entities/user/model/types.ts';
-import { SocketApi } from '@/app/configs/socket/socket.ts';
+import { useThunkDispatch } from '@/shared/lib/useThunkDispatch.ts';
+import { createDialogApi } from '@/entities/dialog';
+import { getUserPostsApi } from '@/entities/post';
+import { getUserProfileApi } from '@/entities/user';
+import { getMyProfileThunk } from '@/entities/user';
+import type { User } from '@/entities/user';
+import { SocketApi } from '@/shared/api/socket';
 
 export const ProfileScreen = () => {
   const [showModal, setShowModal] = useState(false);
   const params = useParams();
   const [posts, setPosts] = useState<any[]>([]);
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
+  const dispatch = useThunkDispatch();
   const [user, setUser] = useState<User | null>(null);
 
   const loadUsers = useCallback(async () => {
@@ -32,7 +33,7 @@ export const ProfileScreen = () => {
 
   const getUsersPosts = useCallback(async () => {
     if (user?.accountId) {
-      const { data: posts } = await apiClient.get(`/posts/user/${user?.accountId}`);
+      const posts = await getUserPostsApi(user.accountId);
       setPosts(posts);
     }
   }, [user?.accountId]);
@@ -43,7 +44,7 @@ export const ProfileScreen = () => {
 
   const createDialog = async () => {
     if (user) {
-      const { data } = await apiClient.post(`/dialogs`, { participantIds: [user?.accountId] });
+      const data = await createDialogApi([user.accountId]);
       navigate(`/messages/${data?.id}`);
     }
   };

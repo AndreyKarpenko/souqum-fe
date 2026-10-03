@@ -1,3 +1,3 @@
-import type { CoreReduxState } from '@/app/model/types.ts';
+import type { UserState } from '@/entities/user/model/types.ts';
 
-export const userInfoSelector = ({ user }: CoreReduxState) => user.user;
+export const userInfoSelector = (state: { user: UserState }) => state.user.user;

@@ -1,8 +1,8 @@
 import React, { type FC, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { userInfoSelector } from '@/entities/user/redux';
-import apiClient from '@/app/api/apiClient.tsx';
+import { userInfoSelector } from '@/entities/user';
 import { DeleteButtonType } from '@/features/deletePostButton/model/types.ts';
+import { deleteByTypeApi } from '@/features/deletePostButton/api/deleteApi.ts';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -19,16 +19,16 @@ export const DeleteButton: FC<{
   const removeHandler = async () => {
     switch (type) {
       case DeleteButtonType.post:
-        await apiClient.delete(`/posts/${post.id}`);
+        await deleteByTypeApi.post(post.id);
         break;
       case DeleteButtonType.comment:
-        await apiClient.delete(`/comments/${comment.id}`);
+        await deleteByTypeApi.comment(comment.id);
         break;
       case DeleteButtonType.message:
-        await apiClient.delete(`/messages/${message.id}`);
+        await deleteByTypeApi.message(message.id);
         break;
       case DeleteButtonType.dialog:
-        await apiClient.delete(`/dialogs/${dialog.id}`);
+        await deleteByTypeApi.dialog(dialog.id);
         break;
       default:
         break;

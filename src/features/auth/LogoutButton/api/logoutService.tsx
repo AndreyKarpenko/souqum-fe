@@ -1,4 +1,4 @@
-import apiClient from '@/app/api/apiClient.tsx';
+import apiClient from '@/shared/api/apiClient';
 
 export const signOutApi = async () => {
   try {

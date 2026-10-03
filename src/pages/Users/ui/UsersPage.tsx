@@ -1,14 +1,17 @@
 import { type FC, useEffect, useState } from 'react';
-import apiClient from '@/app/api/apiClient.tsx';
-import { UserAvatar } from '@/features/userAvatar/ui/UserAvatar.tsx';
-import { UserAvatarType } from '@/features/userAvatar/model/types.ts';
+import { Link } from 'react-router';
+import { useSelector } from 'react-redux';
+import { getAllUsersApi } from '@/entities/user';
+import { UserAvatar } from '@/entities/user';
+import { userInfoSelector } from '@/entities/user';
+import { profilePath } from '@/shared/config/profilePath.ts';
 
 export const UsersPage: FC = () => {
+  const me = useSelector(userInfoSelector);
   const [users, setUser] = useState<any[]>([]);
 
   const getAllUsers = async () => {
-    const { data } = await apiClient.get('/user/all');
-    console.log(data);
+    const data = await getAllUsersApi();
     setUser(data);
   };
 
@@ -22,7 +25,11 @@ export const UsersPage: FC = () => {
         users.map((user) => (
           <>
             <div className={'p-5 gap-5 flex h-30 flex-row items-center bg-amber-400 '}>
-              <UserAvatar profile={user} type={UserAvatarType.comment} />
+              {user.accountId && (
+                <Link to={profilePath(user.accountId, me?.accountId)}>
+                  <UserAvatar user={user} />
+                </Link>
+              )}
               {user.accountId}
               {user.firstName}
               {user.lastName}

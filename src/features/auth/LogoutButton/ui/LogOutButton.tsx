@@ -1,8 +1,8 @@
-import { useAppDispatch } from '@/app/store/useAppDispatch.ts';
-import { signOutThunk } from '@/entities/auth/redux';
+import { useThunkDispatch } from '@/shared/lib/useThunkDispatch.ts';
+import { signOutThunk } from '@/features/auth/LogoutButton/model/signOutThunk.ts';
 
 export const LogOutButton = () => {
-  const dispatch = useAppDispatch();
+  const dispatch = useThunkDispatch();
 
   const logoutHandler = async () => {
     dispatch(signOutThunk());

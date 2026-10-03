@@ -1,10 +1,10 @@
 import { Link, Outlet } from 'react-router';
-import Logo from '@/assets/logo.png';
+import Logo from '@/app/assets/logo.png';
 import { AppInput } from '@/shared/ui/AppInput/AppInput.tsx';
 import { useSelector } from 'react-redux';
-import { userInfoSelector } from '@/entities/user/redux';
-import { UserAvatar } from '@/features/userAvatar/ui/UserAvatar.tsx';
-import { UserAvatarType } from '@/features/userAvatar/model/types.ts';
+import { userInfoSelector } from '@/entities/user';
+import { UserAvatar } from '@/entities/user';
+import { profilePath } from '@/shared/config/profilePath.ts';
 import { LogOutButton } from '@/features/auth/LogoutButton/ui/LogOutButton.tsx';
 
 const menuItems = [
@@ -49,7 +49,11 @@ export const AuthLayout = () => {
           </div>
         </div>
         <div className={'flex flex-1 items-center justify-end gap-5'}>
-          <UserAvatar profile={user} type={UserAvatarType.header} />
+          {user?.accountId && (
+            <Link to={profilePath(user.accountId, user.accountId)}>
+              <UserAvatar user={user} />
+            </Link>
+          )}
           {user?.firstName}
           {user?.lastName}
         </div>

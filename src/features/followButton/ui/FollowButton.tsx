@@ -1,14 +1,14 @@
 import { AppButton } from '@/shared/ui/AppButton/AppButton.tsx';
-import apiClient from '@/app/api/apiClient.tsx';
 import type { FC } from 'react';
+import { followUserApi, unfollowUserApi } from '@/features/followButton/api/followApi.ts';
 
 export const FollowButton: FC<{ user: any }> = ({ user }) => {
   const follow = async () => {
-    await apiClient.post(`user/subscribe/${user?.accountId}`);
+    await followUserApi(user?.accountId);
   };
 
   const unfollow = async () => {
-    await apiClient.delete(`user/unsubscribe/${user?.accountId}`);
+    await unfollowUserApi(user?.accountId);
   };
 
   return (
