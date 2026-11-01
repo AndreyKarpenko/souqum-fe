@@ -6,6 +6,11 @@ export const getInboxApi = async (signal?: AbortSignal): Promise<InboxFeed> => {
   return data;
 };
 
+export const createInboxConversationApi = async (storeId: string): Promise<InboxConversation> => {
+  const { data } = await apiClient.post<InboxConversation>('/inbox/conversations', { storeId });
+  return data;
+};
+
 export const sendStoreMessageApi = async (input: SendStoreMessageInput): Promise<InboxConversation> => {
   const { data } = await apiClient.post<InboxConversation>('/inbox/messages', input);
   return data;

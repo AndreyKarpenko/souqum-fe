@@ -1,13 +1,18 @@
 import apiClient from '@/shared/api/apiClient';
 import type { User } from '@/entities/user/model/types.ts';
 
-export const getMyProfileApi = async () => {
-  const { data } = await apiClient.get('/user');
+const userRequest = (signal?: AbortSignal) => ({
+  timeout: 8000,
+  ...(signal ? { signal } : {}),
+});
+
+export const getMyProfileApi = async (signal?: AbortSignal) => {
+  const { data } = await apiClient.get('/user', userRequest(signal));
   return data;
 };
 
-export const getUserProfileApi = async (id: string): Promise<User> => {
-  const { data } = await apiClient.get(`/user/${id}`);
+export const getUserProfileApi = async (id: string, signal?: AbortSignal): Promise<User | null> => {
+  const { data } = await apiClient.get(`/user/${id}`, userRequest(signal));
   return data;
 };
 

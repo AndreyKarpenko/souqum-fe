@@ -1,7 +1,6 @@
 import type { GenericAbortSignal } from 'axios';
 import type { InboxAvatar, InboxConversation, InboxFeed } from '@/entities/inbox/model/types.ts';
 import { readStoreDto } from '@/shared/api/mock/discoverMock.ts';
-
 type MockResult = {
   status: number;
   data: unknown;
@@ -119,6 +118,38 @@ const cloneConversation = (conversation: InboxConversation): InboxConversation =
   messages: conversation.messages.map((message) => ({ ...message })),
 });
 
+const openStoreConversation = async (body: unknown, signal?: GenericAbortSignal) => {
+  const payload = readBody(body);
+  const storeId = typeof payload?.storeId === 'string' ? payload.storeId : '';
+  const store = readStoreDto(storeId);
+  if (!store) return { status: 404, data: { message: 'Store not found' } };
+
+  const existing = feed.conversations.find((item) => item.mine && item.storeId === storeId);
+  if (existing) {
+    await wait(80, signal);
+    return { status: 200, data: cloneConversation(existing) };
+  }
+
+  const conversation: InboxConversation = {
+    id: `me-${store.id}`,
+    title: `${customerName} → ${store.name}`,
+    preview: 'Ви пишете магазину',
+    storeId: store.id,
+    storeName: store.name,
+    avatar: avatarFor(store.id),
+    subtitle: 'Ви пишете магазину',
+    mine: true,
+    messages: [],
+  };
+  feed.conversations.unshift(conversation);
+  if (!feed.filters.some((filter) => filter.id === store.id)) {
+    feed.filters.push({ id: store.id, label: store.name });
+  }
+
+  await wait(80, signal);
+  return { status: 200, data: cloneConversation(conversation) };
+};
+
 const sendStoreMessage = async (body: unknown, signal?: GenericAbortSignal) => {
   const payload = readBody(body);
   const storeId = typeof payload?.storeId === 'string' ? payload.storeId : '';
@@ -207,6 +238,9 @@ export const resolveMessagesMock = async (
   body?: unknown
 ): Promise<MockResult | null> => {
   const normalized = path.length > 1 && path.endsWith('/') ? path.slice(0, -1) : path;
+  if (method === 'post' && normalized === '/inbox/conversations') {
+    return openStoreConversation(body, signal);
+  }
   if (method === 'post' && normalized === '/inbox/messages') {
     return sendStoreMessage(body, signal);
   }
@@ -217,19 +251,6 @@ export const resolveMessagesMock = async (
     }
     const conversationMatch = normalized.match(/^\/inbox\/conversations\/([^/]+)$/);
     if (conversationMatch) return deleteConversation(decodeURIComponent(conversationMatch[1]), signal);
-  }
-  if (method === 'get' && normalized === '/user') {
-    return {
-      status: 200,
-      data: {
-        accountId: 'me',
-        email: 'maria@example.com',
-        firstName: 'Марія',
-        lastName: '',
-        bio: null,
-        avatar: null,
-      },
-    };
   }
   if (method !== 'get' || normalized !== '/inbox') return null;
 

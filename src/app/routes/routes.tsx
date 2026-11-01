@@ -20,6 +20,7 @@ import OtpPage from '@/pages/Otp/ui/OtpPage.tsx';
 import EmailVerification from '@/pages/EmailVerification/ui/EmailVerification.tsx';
 import LandingPage from '@/pages/Landing/ui/LandingPage.tsx';
 import SignInPage from '@/pages/SignIn/ui/SignInPage.tsx';
+import { SiteFooter } from '@/app/layouts/SiteFooter.tsx';
 
 const GuestRoute: FC<RouteProps> = ({ children }) => {
   const isAuthenticated = useSelector(userIsAuthenticatedSelector);
@@ -167,7 +168,15 @@ export const Router: FC = () => {
             }
           />
         </Route>
-        <Route path="*" element={<div>NOT FOUND</div>} />
+        <Route
+          path="*"
+          element={
+            <div className="flex min-h-screen flex-col bg-[#F6F0E4] text-[#032048] [font-family:Manrope,sans-serif]">
+              <div className="flex flex-1 items-center justify-center text-sm">Сторінку не знайдено</div>
+              <SiteFooter />
+            </div>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

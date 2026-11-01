@@ -1,10 +1,10 @@
-import { LandingFooter } from './LandingFooter.tsx';
+import { SiteFooter } from '@/app/layouts/SiteFooter.tsx';
 import { LandingHeader } from './LandingHeader.tsx';
 import { LandingHero } from './LandingHero.tsx';
 import { LandingValue } from './LandingValue.tsx';
 import { StoreMasonry } from './StoreMasonry.tsx';
 
-function LandingPage() {
+function LandingPage({ footer = true }: { footer?: boolean }) {
   return (
     <div className="min-h-screen bg-[#F6F0E4] text-[#032048] [font-family:Manrope,sans-serif]">
       <LandingHeader />
@@ -13,7 +13,7 @@ function LandingPage() {
         <StoreMasonry />
         <LandingValue />
       </div>
-      <LandingFooter />
+      {footer && <SiteFooter />}
     </div>
   );
 }

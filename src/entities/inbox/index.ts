@@ -8,6 +8,7 @@ export type {
   SendStoreMessageInput,
 } from './model/types.ts';
 export {
+  createInboxConversationApi,
   deleteInboxConversationApi,
   deleteInboxMessageApi,
   getInboxApi,

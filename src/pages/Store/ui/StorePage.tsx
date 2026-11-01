@@ -6,6 +6,18 @@ import { StorePostCard } from '@/pages/Store/ui/StorePostCard.tsx';
 
 const host = window.location.host;
 
+const storefrontHref = (url: string) => {
+  try {
+    const next = new URL(url);
+    if (next.hostname === 'localhost' || next.hostname === '127.0.0.1') {
+      next.hostname = window.location.hostname;
+    }
+    return next.toString();
+  } catch {
+    return url;
+  }
+};
+
 const avatarToneClass: Record<StoreAvatarTone, string> = {
   warm: 'bg-gradient-to-br from-[#4A2A14] to-[#E8943A]',
   clay: 'bg-gradient-to-br from-[#6B3A2A] to-[#D7A07A]',
@@ -122,7 +134,7 @@ const StoreHeader: FC<{
         </Link>
         {profile.storefrontUrl ? (
           <a
-            href={profile.storefrontUrl}
+            href={storefrontHref(profile.storefrontUrl)}
             target="_blank"
             rel="noreferrer"
             className={`${pill} bg-[#032048] text-white hover:bg-[#0A3268]`}

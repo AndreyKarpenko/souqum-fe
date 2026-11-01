@@ -68,7 +68,6 @@ const coolCoffeePosts: StorePost[] = [
 const extras: Record<string, Partial<StoreProfileExtra>> = {
   'cool-coffee': {
     bio: 'Свіжа обжарка малими партіями і посуд для дому.',
-    storefrontUrl: 'https://cool-coffee.example',
     posts: coolCoffeePosts,
   },
 };
@@ -92,6 +91,11 @@ const wait = (ms: number, signal?: GenericAbortSignal) =>
     signal?.addEventListener?.('abort', onAbort, { once: true });
   });
 
+const storefrontUrl = (id: string) => {
+  const hostname = typeof window === 'undefined' ? 'localhost' : window.location.hostname;
+  return `http://${hostname}:3001/?store=${id}`;
+};
+
 const profileFor = (id: string): StoreProfile | null => {
   const store = readStoreDto(id);
   if (!store) return null;
@@ -101,7 +105,7 @@ const profileFor = (id: string): StoreProfile | null => {
     ...store,
     bio: extra?.bio ?? store.description,
     avatarTone: extra?.avatarTone ?? tones[id] ?? 'navy',
-    storefrontUrl: extra?.storefrontUrl ?? null,
+    storefrontUrl: extra?.storefrontUrl ?? storefrontUrl(id),
     conversationId: conversations[id] ?? null,
     posts: extra?.posts ?? [],
   };

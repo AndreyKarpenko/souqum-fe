@@ -42,11 +42,15 @@ const SidebarPanel: FC<{ variant: 'desktop' | 'mobile'; onNavigate?: () => void 
         </div>
       )}
 
-      <nav className="flex flex-col gap-1.5 px-3 pt-3" aria-label="Розділи">
+      <nav
+        className="flex min-h-0 flex-1 flex-col gap-1.5 overflow-y-auto overscroll-y-contain px-3 pt-3"
+        aria-label="Розділи"
+      >
         {appNavItems.map((item) => (
           <NavLink
             key={item.to}
             to={item.to}
+            end={'end' in item && item.end}
             onClick={onNavigate}
             className={({ isActive }) => navClassName(variant, isActive)}
           >
@@ -66,7 +70,7 @@ const SidebarPanel: FC<{ variant: 'desktop' | 'mobile'; onNavigate?: () => void 
         ))}
       </nav>
 
-      <div className="mt-auto flex flex-col gap-2 px-5 pt-6 pb-5">
+      <div className="flex shrink-0 flex-col gap-2 px-5 pt-6 pb-5">
         <LogOutButton />
         <p className="text-xs text-[#032048]/45">{host}</p>
       </div>
@@ -97,25 +101,33 @@ const MobileSidebar: FC<AppSidebarProps> = ({ open, onClose }) => {
     };
   }, [mounted, open]);
 
+  useEffect(() => {
+    if (open || !mounted) return;
+    const timer = window.setTimeout(() => setMounted(false), 320);
+    return () => window.clearTimeout(timer);
+  }, [open, mounted]);
+
   const handleTransitionEnd = (event: TransitionEvent<HTMLElement>) => {
-    if (event.propertyName !== 'transform' || event.target !== event.currentTarget) return;
+    if (event.target !== event.currentTarget) return;
+    if (event.propertyName !== 'translate' && event.propertyName !== 'transform') return;
     if (!open) setMounted(false);
   };
 
   if (!mounted) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-16 z-40 overflow-hidden lg:hidden">
+    <div className={`fixed inset-x-0 top-16 bottom-0 z-40 lg:hidden ${shown ? '' : 'pointer-events-none'}`}>
       <button
         type="button"
-        className={`absolute inset-0 bg-[#032048]/10 transition-opacity duration-300 ease-out ${
+        className={`absolute inset-0 touch-none bg-[#032048]/60 transition-opacity duration-300 ease-out ${
           shown ? 'opacity-100' : 'opacity-0'
         }`}
         aria-label="Закрити меню"
         onClick={onClose}
       />
       <aside
-        className={`absolute inset-y-0 left-0 flex w-[min(80vw,320px)] flex-col bg-[#EFE5D9] shadow-[8px_0_24px_rgba(3,32,72,0.08)] transition-transform duration-300 ease-out ${
+        data-sidebar-scroll
+        className={`absolute inset-y-0 left-0 flex min-h-0 w-[min(80vw,320px)] touch-pan-y flex-col overflow-hidden overscroll-none bg-[#EFE5D9] shadow-[8px_0_24px_rgba(3,32,72,0.08)] transition-[translate] duration-300 ease-out ${
           shown ? 'translate-x-0' : '-translate-x-full'
         }`}
         onTransitionEnd={handleTransitionEnd}
@@ -129,7 +141,7 @@ const MobileSidebar: FC<AppSidebarProps> = ({ open, onClose }) => {
 export const AppSidebar: FC<AppSidebarProps> = ({ open, onClose }) => {
   return (
     <>
-      <aside className="hidden h-full w-[248px] shrink-0 flex-col bg-[#EFE5D9] lg:flex">
+      <aside className="sticky top-0 hidden h-dvh w-[248px] shrink-0 flex-col self-start overflow-hidden bg-[#EFE5D9] lg:flex">
         <SidebarPanel variant="desktop" />
       </aside>
       <MobileSidebar open={open} onClose={onClose} />

@@ -5,8 +5,15 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from 'axios';
+
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    skipAuthRefresh?: boolean;
+  }
+}
 import { resolveDiscoverMock } from '@/shared/api/mock/discoverMock.ts';
 import { resolveMessagesMock } from '@/shared/api/mock/messagesMock.ts';
+import { readSessionUser, resolveProfileMock } from '@/shared/api/mock/profileMock.ts';
 import { resolveStoreMock } from '@/shared/api/mock/storeMock.ts';
 
 const requestPath = (config: InternalAxiosRequestConfig) => {
@@ -29,10 +36,34 @@ const mockingAdapter: AxiosAdapter = async (config) => {
   const method = (config.method ?? 'get').toLowerCase();
   const path = requestPath(config);
 
+  const aborted = (error: unknown) => error instanceof DOMException && error.name === 'AbortError';
+
+  if (method === 'get' && path === '/user') {
+    try {
+      return await getHttpAdapter()(config);
+    } catch (error) {
+      if (aborted(error) || axios.isCancel(error)) {
+        throw new AxiosError('canceled', AxiosError.ERR_CANCELED, config);
+      }
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        throw error;
+      }
+      const response = {
+        data: readSessionUser(),
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config,
+      } as AxiosResponse;
+      return response;
+    }
+  }
+
   try {
     const mocked =
       (await resolveDiscoverMock(method, path, config.params, config.signal)) ??
       (await resolveStoreMock(method, path, config.signal)) ??
+      (await resolveProfileMock(method, path, config.signal, config.data)) ??
       (await resolveMessagesMock(method, path, config.signal, config.data));
     if (!mocked) return getHttpAdapter()(config);
 
@@ -63,11 +94,59 @@ const apiClient = axios.create({
   withCredentials: true,
   adapter: mockingAdapter,
 });
-let requestInterceptor: number | null = null;
-let responseInterceptor: number | null = null;
 let apiRequestController = new AbortController();
-let retryCount = 0;
-const maxRetries = 5;
+
+const PUBLIC_AUTH_PATHS = new Set([
+  '/auth/signin',
+  '/auth/signup',
+  '/auth/verify-otp',
+  '/auth/refresh-token',
+  '/auth/logout',
+  '/auth/forgot-password',
+  '/auth/reset-password',
+  '/auth/confirm-email',
+  '/auth/resend-confirm-email',
+  '/auth/resend-otp',
+]);
+
+type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean };
+
+const skipsTokenRefresh = (config: InternalAxiosRequestConfig) =>
+  config.skipAuthRefresh === true || PUBLIC_AUTH_PATHS.has(requestPath(config));
+
+let onSessionExpired: (() => void | Promise<void>) | null = null;
+let sessionExpiry: Promise<void> | null = null;
+
+export const setSessionExpiredHandler = (handler: (() => void | Promise<void>) | null) => {
+  onSessionExpired = handler;
+};
+
+const notifySessionExpired = () => {
+  if (sessionExpiry) return sessionExpiry;
+
+  sessionExpiry = Promise.resolve()
+    .then(() => onSessionExpired?.())
+    .finally(() => {
+      sessionExpiry = null;
+    });
+
+  return sessionExpiry;
+};
+
+let refreshPromise: Promise<void> | null = null;
+
+const refreshSession = () => {
+  if (!refreshPromise) {
+    refreshPromise = apiClient
+      .post('/auth/refresh-token', undefined, { skipAuthRefresh: true, timeout: 8000 })
+      .then(() => undefined)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+
+  return refreshPromise;
+};
 
 export const abortAllRequests = () => {
   apiRequestController.abort();
@@ -75,47 +154,33 @@ export const abortAllRequests = () => {
   apiClient.defaults.signal = apiRequestController.signal;
 };
 
-export const ejectAuthInterceptor = () => {
-  if (requestInterceptor !== null) {
-    apiClient.interceptors.request.eject(requestInterceptor);
-    requestInterceptor = null;
-  }
-  if (responseInterceptor !== null) {
-    apiClient.interceptors.response.eject(responseInterceptor);
-    responseInterceptor = null;
-  }
-  retryCount = 0;
-};
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    const config = error.config as RetryConfig | undefined;
+    const status = error.response?.status;
 
-export const applyAuthInterceptor = (
-  accessToken: string,
-  onLogout: () => void,
-  onRefresh: () => void
-) => {
-  ejectAuthInterceptor();
-  const onBeforeRequest = async (config: InternalAxiosRequestConfig) => {
-    config.headers.Authorization = `Bearer ${accessToken}`;
-    return config;
-  };
-  requestInterceptor = apiClient.interceptors.request.use(onBeforeRequest);
-
-  responseInterceptor = apiClient.interceptors.response.use(
-    (config) => {
-      retryCount = 0;
-      return config;
-    },
-    (error) => {
-      if (error.response?.status === 401) {
-        retryCount += 1;
-        if (retryCount >= maxRetries) {
-          onLogout();
-        } else {
-          onRefresh();
-        }
-      }
+    if (
+      !config ||
+      status !== 401 ||
+      config._retry ||
+      skipsTokenRefresh(config) ||
+      config.signal?.aborted
+    ) {
       return Promise.reject(error);
     }
-  );
-};
+
+    config._retry = true;
+
+    try {
+      await refreshSession();
+    } catch {
+      await notifySessionExpired();
+      return Promise.reject(error);
+    }
+
+    return apiClient.request(config);
+  }
+);
 
 export default apiClient;

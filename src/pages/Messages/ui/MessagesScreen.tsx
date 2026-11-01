@@ -1,4 +1,4 @@
-import { useEffect, useState, type FC } from 'react';
+import { useEffect, useRef, useState, type FC } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
 import type { InboxConversation } from '@/entities/inbox';
 import { useInbox } from '@/pages/Messages/model/useInbox.ts';
@@ -26,6 +26,7 @@ export const MessagesScreen: FC = () => {
     feed,
     status,
     reload,
+    openStore,
     send,
     sending,
     sendError,
@@ -41,10 +42,33 @@ export const MessagesScreen: FC = () => {
   const navigate = useNavigate();
   const [storeId, setStoreId] = useState('all');
   const [threadOpen, setThreadOpen] = useState(Boolean(id) || Boolean(composeStoreId));
+  const openingStore = useRef<string | null>(null);
 
   useEffect(() => {
     if (id || composeStoreId) setThreadOpen(true);
   }, [id, composeStoreId]);
+
+  useEffect(() => {
+    if (status !== 'ready' || !feed || !composeStoreId) return;
+    if (feed.conversations.some((item) => item.mine && item.storeId === composeStoreId)) return;
+    if (openingStore.current === composeStoreId) return;
+
+    let active = true;
+    openingStore.current = composeStoreId;
+    openStore(composeStoreId)
+      .then((conversation) => {
+        if (!active) return;
+        navigate(`/messages/${conversation.id}`, { replace: true });
+      })
+      .catch(() => {
+        if (openingStore.current === composeStoreId) openingStore.current = null;
+      });
+
+    return () => {
+      active = false;
+      if (openingStore.current === composeStoreId) openingStore.current = null;
+    };
+  }, [composeStoreId, feed, navigate, openStore, status]);
 
   if (status === 'loading') return <InboxSkeleton />;
 

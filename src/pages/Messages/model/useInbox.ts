@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import {
+  createInboxConversationApi,
   deleteInboxConversationApi,
   deleteInboxMessageApi,
   getInboxApi,
@@ -101,6 +102,12 @@ export const useInbox = () => {
     }
   }, []);
 
+  const openStore = useCallback(async (storeId: string) => {
+    const conversation = await createInboxConversationApi(storeId);
+    setFeed((current) => (current ? mergeConversation(current, conversation) : current));
+    return conversation;
+  }, []);
+
   const send = useCallback(async (input: SendStoreMessageInput) => {
     setSending(true);
     setSendError(null);
@@ -122,6 +129,7 @@ export const useInbox = () => {
     feed,
     status,
     reload,
+    openStore,
     send,
     sending,
     sendError,

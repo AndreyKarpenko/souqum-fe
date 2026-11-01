@@ -1,5 +1,5 @@
 export const appNavItems = [
-  { label: 'Profile', to: '/profile' },
+  { label: 'Profile', to: '/profile', end: true },
   { label: 'Feeds', to: '/feeds' },
   { label: 'Discover', to: '/discover' },
   { label: 'Messages', to: '/messages' },
